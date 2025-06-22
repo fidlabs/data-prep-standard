@@ -1,0 +1,31 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    /* Base Options: */
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "target": "es2022",
+    "lib": ["es2022"],
+    "allowJs": false,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "moduleResolution": "nodenext",
+
+    /* Strictness */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noEmitOnError": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* If transpiling with TypeScript: */
+    "outDir": "./dist",
+    "module": "nodenext",
+    "rootDir": "src",
+    "sourceMap": true,
+  },
+  "include": [
+    "src/**/*",
+  ],
+
+}

@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This specification defines the format of Filecoin Data Preparation Manifests.
+This specification defines an extensible and interoperable format for content manifests for datasets stored on Filecoin.
 
 ### Versioning
 

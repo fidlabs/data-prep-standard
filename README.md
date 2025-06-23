@@ -28,7 +28,7 @@ channels (git repository, website, etc) and which identifies the dataset piece i
 provides human readable guidance on the content of the dataset, and contains a manifest of
 all the file system entities (directories and files) contained in each piece of the dataset.
 
-Further, in each stored piece of the dataset, there is a sub-manifest which contains the
+Further, to support efficient partial downloads, in each stored piece of the dataset, there is a sub-manifest which contains the
 same metadata as the super-manifest, but with only the file system manifest section for that
 specific piece.
 

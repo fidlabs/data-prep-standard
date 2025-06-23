@@ -55,7 +55,7 @@ Data Preparation Manifest Specification versions follow [SemVer 2.0.0](https://s
             "node_type": "file | directory",
             "name": "file / directory name",
             "cid": "node CID for the file / directory",
-            "content_type": "optional mime type if file",
+            "media_type": "optional content-type if file",
             "contents": []
         }
     ]

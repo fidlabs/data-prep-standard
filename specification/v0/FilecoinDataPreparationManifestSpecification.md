@@ -6,7 +6,7 @@ This specification defines an extensible and interoperable format for content ma
 
 ### Versioning
 
-Filecoin Data Preparation Manifest Specification versions follow [SemVer 2.0.0](https://semver.org/)
+Data Preparation Manifest Specification versions follow [SemVer 2.0.0](https://semver.org/)
 
 ## Super-manifest
 

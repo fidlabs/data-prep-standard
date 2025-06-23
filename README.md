@@ -5,13 +5,9 @@ and a command line tool for creating and verifying prepared data from / to unix 
 
 ## Introduction
 
-It is hard to have confidence (or prove to the world in general) that files and data stored
-on Filecoin are actually present, findable, and retrievable in a real storage. For instance,
-useful public open data sets are stored on Filecoin but are not widely used because they
-are hard to find and download (AKA ‘the retrievability problem’). One significant reason for
-this is actually at the creation end, not the retrieval end: the preparation of files into
-archives and then into Filecoin deals is not sufficiently standardized to make user-level
-interactions reasonable or scalable.
+Filecoin provides storage for some extremely useful and valuable data sets, but thy are not as easy to find and use as they might be owing to the fact that they are prepared, compressed, stored, and indexed in different ways by different data set owners and Storage Providers.
+
+Because of these differences, even when one data set is well documented and locatable, that does not necessarily help a user to find and download other similar datasets.
 
 This project provides a data formatting standard and set of tooling that make it
 easy for motivated actors to store files on Filecoin using interoperable and standardized

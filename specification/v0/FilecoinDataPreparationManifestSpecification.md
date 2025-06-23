@@ -52,7 +52,7 @@ Data Preparation Manifest Specification versions follow [SemVer 2.0.0](https://s
     "payload_cid", "CID for the payload within the piece (CAR CID)",
     "contents": [
         {
-            "type": "file | directory",
+            "node_type": "file | directory",
             "name": "file / directory name",
             "cid": "node CID for the file / directory",
             "content_type": "optional mime type if file",

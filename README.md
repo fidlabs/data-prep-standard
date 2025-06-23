@@ -1,6 +1,6 @@
 # data-prep-standard
 
-This repository contains the specification for the Filecoin Data Preparation Manifest Format
+This repository contains a specification for an extensible and interoperable manifest format for datasets stored on Filecoin```
 and a command line tool for creating and verifying prepared data from / to unix file system.
 
 ## Introduction

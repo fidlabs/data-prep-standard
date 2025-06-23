@@ -70,7 +70,7 @@ cli
 
 cli
   .command("join [...car]")
-  .describe("Join CARs into a single CARs.")
+  .describe("Join CARs into a single CAR.")
   .action(createAction("./cmd/join.js"));
 
 cli.parse(process.argv);

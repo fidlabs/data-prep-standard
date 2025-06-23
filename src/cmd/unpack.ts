@@ -1,0 +1,8 @@
+/**
+ * @param {string} carPath
+ * @param {object} [opts]
+ * @param {boolean} [opts.verify]
+ */
+export default function unpack(carPath: string, opts: object): void {
+  console.log("unpack NYI", carPath, opts);
+}

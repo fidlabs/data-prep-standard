@@ -1,0 +1,11 @@
+.vscode
+node_modules
+dist
+coverage
+package-lock.json
+package.json
+*.md
+tsconfig.json
+next
+.prettierrc.json
+specification

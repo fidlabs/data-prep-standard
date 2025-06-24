@@ -1,0 +1,8 @@
+{
+    "name": "basic",
+    "description": "basic test metadata",
+    "version": "2025/06/15",
+    "license": "MIT",
+    "project_url": "https://test.org",
+    "open_with": "browser"
+}

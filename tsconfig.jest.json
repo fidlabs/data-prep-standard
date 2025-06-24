@@ -11,6 +11,7 @@
     "resolveJsonModule": true,
     "moduleDetection": "force",
     "moduleResolution": "nodenext",
+    "isolatedModules": true,
 
     /* Strictness */
     "strict": true,

@@ -1,4 +1,4 @@
-# Filecoin Data Preparation Manifest Specification
+# Filecoin Data Preparation Manifest Specification v0
 
 ## Introduction
 
@@ -10,13 +10,27 @@ Data Preparation Manifest Specification versions follow [SemVer 2.0.0](https://s
 
 ## Super-manifest
 
+[!TODO]
+Separate into 2 sections: a table of properties with longer form descriptions, links etc, and then an example.
+
+| Property key | Data type | Description |
+| ----         | ----      | ----        |
+| schema       | String    | ... |
+| schema_version | ... | ...|
+
+[!TODO]
+Then with the table complete the below can become a more faithful example.
+
+[!TODO]
+Make contents optional (with --lite option in tool) for cases where they get too huge
+
 ```
 {
     "@schema": "URL to version of the manifest specification used for this manifest",
     "@schema_version": "SemVer version number of the specification used for this manifest",
     "name": "Name of the dataset, max 256 characters",
     "description": "Description of the dataset, max 4K characters",
-    "license": "Names of the license(s) the dataset is distributed under, max 64 characters, e.g. 'Apache-2.0 or MIT`",
+    "license": "SPDX-License-Identifier of the license(s) the dataset is distributed under, max 64 characters, e.g. 'Apache-2.0 or MIT`",
     "url": "Dataset project URL, max 2048 characters",
     "uuid": "Tooling assigned unique ID for this dataset",
     "n_pieces": 4,
@@ -29,6 +43,7 @@ Data Preparation Manifest Specification versions follow [SemVer 2.0.0](https://s
                 "type": "file | directory",
                 "name": "file / directory name",
                 "cid": "node CID for the file / directory",
+                "byte_length": 234,
                 "content_type": "optional mime type if file",
                 "contents": []
             }
@@ -38,6 +53,12 @@ Data Preparation Manifest Specification versions follow [SemVer 2.0.0](https://s
 ```
 
 ## Sub-manifest
+
+[!TODO]
+Table and example format as above
+
+[!TODO]
+Highlight that this is a submianifest
 
 ```
 {
@@ -49,12 +70,12 @@ Data Preparation Manifest Specification versions follow [SemVer 2.0.0](https://s
     "uuid": "Tooling assigned unique ID for this dataset",
     "n_pieces": 4,
     "tags": ["tags", "for the", "dataset"],
-    "payload_cid", "CID for the payload within the piece (CAR CID)",
     "contents": [
         {
             "node_type": "file | directory",
             "name": "file / directory name",
             "cid": "node CID for the file / directory",
+            "byte_length": 234,
             "media_type": "optional content-type if file",
             "contents": []
         }

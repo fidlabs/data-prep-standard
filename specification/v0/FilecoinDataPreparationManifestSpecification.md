@@ -48,7 +48,7 @@ A sub-manifest shall be provided inside each CAR (piece) which describes the con
 | description     | String    | required, utf-8, max-len 4096        | Description of the dataset. |
 | open_with       | String    | optional, utf-8, max-len 256         | Guidance on what tool is needed to use the dataset.  |
 | license         | String    | required, utf-8, [SPDX-License-Identifier](https://spdx.org/licenses/), max-len 64  | License(s) the dataset is distributed under. |
-| url             | String    | required, utf-8, [URL](https://datatracker.ietf.org/doc/html/rfc1738), max-len 2048  | Website for the project that created the dataset. |
+| project_url             | String    | required, utf-8, [URL](https://datatracker.ietf.org/doc/html/rfc1738), max-len 2048  | Website for the project that created the dataset. |
 | uuid            | String    | required, utf-8, [UUID v4](https://datatracker.ietf.org/doc/html/rfc4122). | Tooling assigned unique ID for this preparation of the dataset. |
 | n_pieces        | Number    | required, positive integer  | Number of pieces making up the complete dataset. |
 | tags            | Array(String) | optional, array max-len 32, string utf-8, max-len 64  | User supplied tags for the dataset. |

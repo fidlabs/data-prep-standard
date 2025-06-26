@@ -23,7 +23,7 @@
   "scripts": {
     "build": "npx tsc && chmod a+x dist/bin.js",
     "test": "npm run test:unit",
-    "test:unit": "jest --coverage --json --outputFile=coverage/report.json --testLocationInResults ./src/cmd",
+    "test:unit": "jest --coverage ./src/cmd",
     "test:system": "NODE_OPTIONS=--experimental-vm-modules jest ./dist/bin.e2e.test.js",
     "lint": "eslint ./src",
     "lint:fix": "eslint --fix ./src",

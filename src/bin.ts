@@ -13,6 +13,9 @@ const cli = sade(pkg.name);
 
 cli.version(pkg.version).example("pack path/to/file/or/dir");
 
+// [!TODO]
+// Make contents optional (with --lite option in tool) for cases where they get too huge
+
 cli
   .command("pack [file]")
   .alias("p")

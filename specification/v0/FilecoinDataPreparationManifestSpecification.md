@@ -14,7 +14,7 @@ A super-manifest describes a complete and coherent dataset which may be stored a
 
 | Property key    | Data type | Validation  | Description |
 | ----            | ----      | ----        | ----        |
-| @spec           | String    | required, utf-8, URL, max-len 256    | URL for version of the manifest specification used for this manifest. |
+| @spec           | String    | required, utf-8, [URL](https://datatracker.ietf.org/doc/html/rfc1738), max-len 256    | URL for version of the manifest specification used for this manifest. |
 | @spec_version   | String    | required, utf-8, [SemVer 2.0.0](https://semver.org/), max-len 32  | Version number of the specification used for this manifest. |
 | @type           | String    | required, utf-8 "super-manifest"     | This is a super-manifest.  |
 | name            | String    | required, utf-8, max-len 128         | Name of the dataset. |

@@ -10,7 +10,7 @@ Data Preparation Manifest Specification versions follow [SemVer 2.0.0](https://s
 
 ## Super-manifest
 
-A super-manifest describes a complete dataset which may be stored as several pieces (due to storage segment size constraints) and is a JSON document with the following content:
+A super-manifest describes a complete and coherent dataset which may be stored as several pieces (due to storage segment size constraints) and is a JSON document with the following content:
 
 | Property key    | Data type | Validation  | Description |
 | ----            | ----      | ----        | ----        |
@@ -19,12 +19,13 @@ A super-manifest describes a complete dataset which may be stored as several pie
 | @type           | String    | required, utf-8 "super-manifest"     | This is a super-manifest.  |
 | name            | String    | required, utf-8, max-len 128         | Name of the dataset. |
 | description     | String    | required, utf-8, max-len 4096        | Description of the dataset. |
+| open_with       | String    | optional, utf-8, max-len 256         | Guidance on what tool is needed to use the dataset.  |
 | license         | String    | required, utf-8, [SPDX-License-Identifier](https://spdx.org/licenses/), max-len 64  | License(s) the dataset is distributed under. |
-| url             | String    | required, utf-8, [URL](https://datatracker.ietf.org/doc/html/rfc1738), max-len 2048  | Dataset project URL. |
+| url             | String    | required, utf-8, [URL](https://datatracker.ietf.org/doc/html/rfc1738), max-len 2048  | Website for the project that created the dataset. |
 | uuid            | String    | required, utf-8, [UUID v4](https://datatracker.ietf.org/doc/html/rfc4122)  | Tooling assigned unique ID for this preparation of the dataset. |
 | n_pieces        | Number    | required, positive integer  | Number of pieces making up the complete dataset. |
 | tags            | Array(String) | optional, array max-len 32, string utf-8, max-len 64  | User supplied tags for the dataset. |
-| pieces          | Array(Piece) | required  | Definition of all the pieces that make up the dataset. |
+| pieces          | Array(Piece) | required  | List of all the pieces that make up the dataset. |
 
 A Piece has the following content:
 
@@ -32,7 +33,7 @@ A Piece has the following content:
 | ----            | ----      | ----        | ----        |
 | piece_cid       | String    | required, utf-8, [CID v1](https://docs.ipfs.tech/concepts/content-addressing/#version-1-v1)  | Content Identifier for the piece (as in the Filecoin deal). |
 | payload_cid     | String    | required, utf-8, [CID v1](https://docs.ipfs.tech/concepts/content-addressing/#version-1-v1)  | Content Identifier for the payload (CAR) in the piece. |
-| contents        | Array(Entry) | optional  | Definition of the files and directories in the piece.  |
+| contents        | Array(Entry) | optional  | List of the files and directories in the piece.  |
 
 ## Sub-manifest
 
@@ -45,12 +46,13 @@ A sub-manifest shall be provided inside each CAR (piece) which describes the con
 | @type           | String    | required, utf-8 "sub-manifest"       | This is a sub-manifest.  |
 | name            | String    | required, utf-8, max-len 128         | Name of the dataset. |
 | description     | String    | required, utf-8, max-len 4096        | Description of the dataset. |
+| open_with       | String    | optional, utf-8, max-len 256         | Guidance on what tool is needed to use the dataset.  |
 | license         | String    | required, utf-8, [SPDX-License-Identifier](https://spdx.org/licenses/), max-len 64  | License(s) the dataset is distributed under. |
-| url             | String    | required, utf-8, [URL](https://datatracker.ietf.org/doc/html/rfc1738), max-len 2048  | Dataset project URL. |
+| url             | String    | required, utf-8, [URL](https://datatracker.ietf.org/doc/html/rfc1738), max-len 2048  | Website for the project that created the dataset. |
 | uuid            | String    | required, utf-8, [UUID v4](https://datatracker.ietf.org/doc/html/rfc4122). | Tooling assigned unique ID for this preparation of the dataset. |
 | n_pieces        | Number    | required, positive integer  | Number of pieces making up the complete dataset. |
 | tags            | Array(String) | optional, array max-len 32, string utf-8, max-len 64  | User supplied tags for the dataset. |
-| contents        | Array(Entry) | optional  | Definition of the files and directories in the CAR.  |
+| contents        | Array(Entry) | optional  | List of the files and directories in the CAR.  |
 
 ## Common
 
@@ -71,7 +73,7 @@ An Entry of type "file" has the following addition content:
 An Entry of type "directory" has the following addition content:
 | Property key | Data type | Validation  | Description |
 | ----         | ----      | ----        | ----        |
-| contents     | Array(Entry) | required  | Definition of the files and directories in the directory.  |
+| contents     | Array(Entry) | required  | List of the files and directories in the directory.  |
 
 
 ## Examples:
@@ -85,6 +87,7 @@ An Entry of type "directory" has the following addition content:
     "@type": "super-manifest,
     "name": "Dogs",
     "description": "Pictures of dogs",
+    "open_with": "web browser",
     "license": "Apache-2.0 or MIT",
     "url": "https://dog.ceo/dog-api/",
     "uuid": "7DD30437-56C9-487B-8DF6-62C7DA251EF1",
@@ -139,6 +142,7 @@ An Entry of type "directory" has the following addition content:
     "@type": "sub-manifest,
     "name": "Dogs",
     "description": "Pictures of dogs",
+    "open_with": "web browser",
     "license": "Apache-2.0 or MIT",
     "url": "https://dog.ceo/dog-api/",
     "uuid": "7DD30437-56C9-487B-8DF6-62C7DA251EF1",

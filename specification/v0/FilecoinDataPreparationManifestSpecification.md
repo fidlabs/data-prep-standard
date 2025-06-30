@@ -93,7 +93,7 @@ A sub-manifest shall be provided inside each CAR (piece) which describes the con
 
 | Property key | Data type | Validation  | Description |
 | ----         | ----      | ----        | ----        |
-| @type        | String    | required, utf-8, "[file](#subfile)" \| "[part](#subpart)" \| "[directory](#directory)"  | Type of SubEntry. |
+| @type        | String    | required, utf-8, "[file](#subfile)" \| "[file-part](#subpart)" \| "[directory](#directory)"  | Type of SubEntry. |
 | name         | String    | required, utf-8, max-len 255 | name of file / part / directory. |
 
 
@@ -105,7 +105,7 @@ A sub-manifest shall be provided inside each CAR (piece) which describes the con
 | hash         | String    | required, utf-8, SHA256 hash  | Cryptographic hash of the original file on disk, used for verifying unpacked datasets.  |
 | media_type   | String    | optional, utf-8, [media (MIME) type](https://datatracker.ietf.org/doc/html/rfc6838) | file content's [registered media type](https://www.iana.org/assignments/media-types/media-types.xhtml) label. |
 
-<a href="#subpart"></a>A SubEntry of type "part" has the following content:
+<a href="#subpart"></a>A SubEntry of type "file-part" has the following content:
 | Property key | Data type | Validation  | Description |
 | ----         | ----      | ----        | ----        |
 | byte_length  | Number    | required, whole number | size of the file part in bytes. |

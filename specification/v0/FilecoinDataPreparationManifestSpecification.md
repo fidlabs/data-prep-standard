@@ -116,7 +116,7 @@ A sub-manifest shall be provided inside each CAR (piece) which describes the con
 
 ## Common
 
-<a href="#directory"></a>A SUperEntry or SubEntry of type "directory" has the following addition content:
+<a href="#directory"></a>A SuperEntry or SubEntry of type "directory" has the following addition content:
 | Property key | Data type | Validation  | Description |
 | ----         | ----      | ----        | ----        |
 | contents     | Array(Entry) | required  | List of the files, part and directories in the directory.  |

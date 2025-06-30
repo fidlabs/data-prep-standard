@@ -46,7 +46,7 @@
     "eslint-plugin-n": "^17.20.0",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "execa": "^9.6.0",
-    "jest": "^30.0.2",
+    "jest": "^30.0.3",
     "prettier": "^3.6.2",
     "ts-jest": "^29.4.0",
     "ts-jest-resolver": "^2.0.1",

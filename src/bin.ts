@@ -21,7 +21,7 @@ cli
     "Pack files into one or more Content Addressable aRchives (CARs) with manifests."
   )
   .description(
-    `Pack files into a CAR.
+    `Pack files into one or more Content Addressable aRchives (CARs) with manifests.
 
 You must provide a JSON file with manifest metadata containing the following fields:
 - "name": The name of the dataset.

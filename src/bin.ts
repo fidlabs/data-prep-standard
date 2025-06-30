@@ -33,7 +33,7 @@ You must provide a JSON file with manifest metadata containing the following fie
 - "name": The name of the dataset.
 - "description": A description of the dataset.
 - "version": The version of the dataset, typically a date in YYYY-MM-DD format.
-- "license": The license of the dataset.
+- "license": The SPDX-License-Identifier for the license of the dataset.
 - "url": A URL to the dataset project website.
 - "open_with": Guidance on what tool is needed to use the dataset.
 - "tags": An optional array of tag strings for the dataset.  Can be used to aid dataset discovery.`

@@ -23,6 +23,12 @@ cli
   .description(
     `Pack files into one or more Content Addressable aRchives (CARs) with manifests.
 
+The resulting CAR files will be suitable for use with Filecoin and IPFS, and will
+include a manifest file that describes the contents of the CAR.
+
+In addition, a super-manifest will be created that contains metadata about the dataset,
+including references to all the Filecoin deal pieces.
+
 You must provide a JSON file with manifest metadata containing the following fields:
 - "name": The name of the dataset.
 - "description": A description of the dataset.

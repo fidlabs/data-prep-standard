@@ -53,7 +53,7 @@ cli
   .description("Unpack files and directories from a [set of] CAR[s].")
   .option(
     "-s, --super-manifest <file>",
-    "Super manifest for the dataset. If supplied will be used to verify the full dataset."
+    "Super-manifest for the dataset. If supplied will be used to verify the full dataset."
   )
   .option("--verify", "Verify block hash consistency.", true)
   .requiredOption("-o, --output <dir>", "Output directory.")
@@ -75,7 +75,7 @@ cli
   .description("Verify CAR contents from manifests.")
   .option(
     "-s, --super-manifest <file>",
-    "Super manifest for the dataset. If supplied will be used to verify the full dataset."
+    "Super-manifest for the dataset. If supplied will be used to verify the full dataset."
   )
   .action(createAction("./cmd/verify.js"));
 

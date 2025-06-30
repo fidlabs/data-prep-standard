@@ -110,8 +110,8 @@ A sub-manifest shall be provided inside each CAR (piece) which describes the con
 | ----         | ----      | ----        | ----        |
 | byte_length  | Number    | required, whole number | size of the file part in bytes. |
 | cid          | String    | required, utf-8, [CID v1](https://docs.ipfs.tech/concepts/content-addressing/#version-1-v1)  | Content Identifier for the file / directory. |
-| original-file-name  | String   | required, utf-8, max-len 256  | file name of the original file on disk.  |
-| original-file-hash  | String   | required, utf-8, SHA256 hash  | Cryptographic hash of the original file on disk, used as a "back link" to identify the original file in the super-manifest.  |
+| original_file_name  | String   | required, utf-8, max-len 256  | file name of the original file on disk.  |
+| original_file_hash  | String   | required, utf-8, SHA256 hash  | Cryptographic hash of the original file on disk, used as a "back link" to identify the original file in the super-manifest.  |
 
 
 ## Common
@@ -241,8 +241,8 @@ Sub manifest in CAR in Piece 1
                     "name": "crufts.mpeg.part_000",
                     "byte_length": 234533,
                     "cid": "bafkreibgjlm6mrxx4ffghw2z3ozjmxpu7kcvlip5suvmkj7ekpdefeyoky",
-                    "original-file-name" : "crufts.mpeg",
-                    "original-file-hash" : "f606d62ef8e97eb527556da69de37f02026167933a617b07be33a570fbdd61a4"
+                    "original_file_name" : "crufts.mpeg",
+                    "original_file_hash" : "f606d62ef8e97eb527556da69de37f02026167933a617b07be33a570fbdd61a4"
                 },
             ]
         }
@@ -275,8 +275,8 @@ Sub manifest in CAR in Piece 2
                     "name": "crufts.mpeg.part_001",
                     "byte_length": 143243,
                     "cid": "bafkreiefzwqep242uwiplt46jaktsj2u43zdeyt55igf57xp3hvewztrwa",
-                    "original-file-name" : "crufts.mpeg",
-                    "original-file-hash" : "f606d62ef8e97eb527556da69de37f02026167933a617b07be33a570fbdd61a4"
+                    "original_file_name" : "crufts.mpeg",
+                    "original_file_hash" : "f606d62ef8e97eb527556da69de37f02026167933a617b07be33a570fbdd61a4"
                 },
             ]
         },

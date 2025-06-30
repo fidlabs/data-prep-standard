@@ -162,7 +162,7 @@ A sub-manifest shall be provided inside each CAR (piece) which describes the con
                     "cid": "bafkreiflb6kpfyupgm42tfq55ag3sr3qv3nqiw625jdriyx6wr5ewynppe",
                     "byte_length": 17376,
                     "media_type": "image/jpeg",
-                    "piece": "bafkreiaw7ga7qnz2jazjh5i7ymarpojwlptatlps4rj7w4yqvey3yucb74"
+                    "piece_cid": "bafkreiaw7ga7qnz2jazjh5i7ymarpojwlptatlps4rj7w4yqvey3yucb74"
                 },
                 {
                     "type": "@split-file",
@@ -176,7 +176,7 @@ A sub-manifest shall be provided inside each CAR (piece) which describes the con
                             "name": "crufts.mpeg.part_000",
                             "byte_length": 234533,
                             "cid": "bafkreibgjlm6mrxx4ffghw2z3ozjmxpu7kcvlip5suvmkj7ekpdefeyoky",
-                            "piece_cid": "ppppppppppp"
+                            "piece_cid": "bafkreiaw7ga7qnz2jazjh5i7ymarpojwlptatlps4rj7w4yqvey3yucb74"
                         },
                         {
                             "name": "crufts.mpeg.part_001",
@@ -199,7 +199,7 @@ A sub-manifest shall be provided inside each CAR (piece) which describes the con
                     "cid": "bafkreifqdymdakaospihjaqoh56h2gqv2icxyqkpphr47ixmjgoabtaffy",
                     "byte_length": 17376,
                     "media_type": "image/jpeg",
-                    "piece": "bafkreig5chwsxzyow7pc7iiokxibmxvqspubnabjzo65lctoxthvavc35q"
+                    "piece_cid": "bafkreig5chwsxzyow7pc7iiokxibmxvqspubnabjzo65lctoxthvavc35q"
                 }
             ]
         }

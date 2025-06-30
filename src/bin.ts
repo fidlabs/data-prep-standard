@@ -36,7 +36,7 @@ You must provide a JSON file with manifest metadata containing the following fie
 - "license": The license of the dataset.
 - "url": A URL to the dataset project website.
 - "open_with": Guidance on what tool is needed to use the dataset.
-- "tags": An optional array of tag strings for the dataset.  May be used to aid dataset discovery.`
+- "tags": An optional array of tag strings for the dataset.  Can be used to aid dataset discovery.`
   )
   .requiredOption("-m, --metadata <file>", "JSON file with manifest metadata.")
   .requiredOption("-o, --output <dir>", "Output directory.")

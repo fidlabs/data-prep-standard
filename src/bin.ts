@@ -17,7 +17,9 @@ cli.version(pkg.version);
 cli
   .command("pack")
   .argument("<files...>")
-  .summary("Pack files into a CAR.")
+  .summary(
+    "Pack files into one or more Content Addressable aRchives (CARs) with manifests."
+  )
   .description(
     `Pack files into a CAR.
 

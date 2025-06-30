@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 
-import sade from "sade";
+import { Command } from "commander";
 
 const pkg = JSON.parse(
   fs.readFileSync(new URL("../package.json", import.meta.url)).toString()
@@ -9,72 +9,67 @@ const pkg = JSON.parse(
   name: string;
   version: string;
 };
-const cli = sade(pkg.name);
+const cli = new Command();
+cli.name(pkg.name);
 
-cli.version(pkg.version).example("pack path/to/file/or/dir");
-
-// [!TODO]
-// Make contents optional (with --lite option in tool) for cases where they get too huge
+cli.version(pkg.version);
 
 cli
-  .command("pack [file]")
-  .alias("p")
-  .describe("Pack files into a CAR.")
-  .example("pack path/to/file/or/dir")
-  .example("pack images --output images.car")
-  .example("pack --no-wrap snow.mov > snow.mov.car")
+  .command("pack")
+  .argument("<files...>")
+  .summary("Pack files into a CAR.")
+  .description(
+    `Pack files into a CAR.
+
+You must provide a JSON file with manifest metadata containing the following fields:
+- "name": The name of the dataset.
+- "description": A description of the dataset.
+- "version": The version of the dataset, typically a date in YYYY-MM-DD format.
+- "license": The license of the dataset.
+- "url": A URL to the dataset project website.
+- "open_with": Guidance on what tool is needed to use the dataset.
+- "tags": An optional array of tag strings for the dataset.  May be used to help dataset discovery.`
+  )
+  .requiredOption("-m, --metadata <file>", "JSON file with manifest metadata.")
+  .requiredOption("-o, --output <dir>", "Output directory.")
   .option("-H, --hidden", 'Include paths that start with ".".', false)
+  .option("-l, --lite", "Don't include contents in the manifests.", false)
   .option("--wrap", "Wrap input files with a directory.", true)
-  .option("-o, --output", "Output file.")
+  .option("--target-car-size <size>", "Target size of CAR files.", "32GB")
   .action(createAction("./cmd/pack.js"));
 
 cli
-  .command("unpack [car]")
-  .alias("un")
-  .describe("Unpack files and directories from a CAR.")
+  .command("unpack")
+  .argument("<CAR...>")
+  .summary("Unpack files and directories from a [set of] CAR[s].")
+  .description("Unpack files and directories from a [set of] CAR[s].")
+  .option(
+    "-s, --super-manifest <file>",
+    "Super manifest for the dataset. If supplied will be used to verify the full dataset."
+  )
   .option("--verify", "Verify block hash consistency.", true)
-  .option("-o, --output", "Output file.")
-  .option("-r, --root", "Root CID to unpack.")
+  .requiredOption("-o, --output <dir>", "Output directory.")
   .action(createAction("./cmd/unpack.js"));
 
 cli
-  .command("roots [car]")
-  .describe("List root CIDs from a CAR.")
-  .option(
-    "-i, --implicit",
-    "List roots found implicitly from the blocks contained within the CAR.",
-    false
-  )
-  .action(createAction("./cmd/roots.js"));
-
-cli
-  .command("ls [car]")
-  .alias("list", "files")
-  .describe("List files and directories from a CAR.")
+  .command("ls")
+  .argument("<CAR>")
+  .summary("List files and directories from a CAR.")
+  .description("List files and directories from a CAR.")
   .option("-r, --root", "Root CID to list files from.")
   .option("--verbose", "Print file CIDs and byte sizes.")
   .action(createAction("./cmd/ls.js"));
 
 cli
-  .command("blocks [car]")
-  .describe("List block CIDs from a CAR.")
-  .option("--verify", "Verify block hash consistency.", true)
-  .action(createAction("./cmd/blocks.js"));
-
-cli
-  .command("hash [car]")
-  .describe("Generate CID for a CAR.")
-  .action(createAction("./cmd/hash.js"));
-
-cli
-  .command("split [car]")
-  .describe("Split a CAR into smaller CARs.")
-  .action(createAction("./cmd/split.js"));
-
-cli
-  .command("join [...car]")
-  .describe("Join CARs into a single CAR.")
-  .action(createAction("./cmd/join.js"));
+  .command("verify")
+  .argument("<CAR...>")
+  .summary("Verify CAR contents from manifests.")
+  .description("Verify CAR contents from manifests.")
+  .option(
+    "-s, --super-manifest <file>",
+    "Super manifest for the dataset. If supplied will be used to verify the full dataset."
+  )
+  .action(createAction("./cmd/verify.js"));
 
 cli.parse(process.argv);
 

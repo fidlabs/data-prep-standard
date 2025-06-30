@@ -9,35 +9,39 @@ describe("CLI", function () {
     assert.throws(() => execaSync(binPath));
   });
 
-  it("blocks succeeds", () => {
-    assert.doesNotThrow(() => execaSync(binPath, ["blocks"]));
-  });
-
-  it("hash succeeds", () => {
-    assert.doesNotThrow(() => execaSync(binPath, ["hash"]));
-  });
-
-  it("join succeeds", () => {
-    assert.doesNotThrow(() => execaSync(binPath, ["join"]));
-  });
-
   it("ls succeeds", () => {
-    assert.doesNotThrow(() => execaSync(binPath, ["ls"]));
+    assert.doesNotThrow(() => execaSync(binPath, ["ls", "path/to/car"]));
   });
 
   it("pack succeeds", () => {
-    assert.doesNotThrow(() => execaSync(binPath, ["pack"]));
-  });
-
-  it("roots succeeds", () => {
-    assert.doesNotThrow(() => execaSync(binPath, ["roots"]));
-  });
-
-  it("split succeeds", () => {
-    assert.doesNotThrow(() => execaSync(binPath, ["split"]));
+    assert.doesNotThrow(() =>
+      execaSync(binPath, [
+        "pack",
+        "-m",
+        "path/to/metadata.json",
+        "-o",
+        "path/to/output",
+        "path/to/file1",
+        "path/to/file2",
+      ])
+    );
   });
 
   it("unpack succeeds", () => {
-    assert.doesNotThrow(() => execaSync(binPath, ["unpack"]));
+    assert.doesNotThrow(() =>
+      execaSync(binPath, [
+        "unpack",
+        "-o",
+        "path/to/output",
+        "path/to/car1",
+        "path/to/car2",
+      ])
+    );
+  });
+
+  it("verify succeeds", () => {
+    assert.doesNotThrow(() =>
+      execaSync(binPath, ["verify", "path/to/car1", "path/to/car2"])
+    );
   });
 });

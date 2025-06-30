@@ -3,6 +3,6 @@
  * @param {object} [opts]
  * @param {boolean} [opts.verify]
  */
-export default function hash(carPath: string) {
-  console.log("hash NYI", carPath);
+export default function verify(files: string[]) {
+  console.log("verify NYI", files);
 }

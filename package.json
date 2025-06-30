@@ -35,7 +35,7 @@
     "dist"
   ],
   "dependencies": {
-    "sade": "^1.8.1"
+    "commander": "^14.0.0"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",

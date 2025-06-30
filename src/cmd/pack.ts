@@ -3,6 +3,6 @@
  * @param {object} [opts]
  * @param {boolean} [opts.verify]
  */
-export default function pack(filePath: string, opts: object) {
-  console.log("pack NYI", filePath, opts);
+export default function pack(files: string[], opts: object) {
+  console.log("pack NYI", files, opts);
 }

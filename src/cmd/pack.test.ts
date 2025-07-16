@@ -27,7 +27,6 @@ const mocked_iterateFilesFromPathsWithSize =
     typeof iterateFilesFromPathsWithSize
   >;
 
-
 const { default: pack } = await import("./pack.js");
 
 const basicUserMetadata = {

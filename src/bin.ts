@@ -34,7 +34,7 @@ You must provide a JSON file with manifest metadata containing the following fie
 - "description": A description of the dataset.
 - "version": The version of the dataset, typically a date in YYYY-MM-DD format.
 - "license": The SPDX-License-Identifier for the license of the dataset.
-- "url": A URL to the dataset project website.
+- "project_url": A URL to the dataset project website.
 - "open_with": Guidance on what tool is needed to use the dataset.
 - "tags": An optional array of tag strings for the dataset.  Can be used to aid dataset discovery.`
   )
@@ -43,6 +43,11 @@ You must provide a JSON file with manifest metadata containing the following fie
   .option("-H, --hidden", 'Include paths that start with ".".', false)
   .option("-l, --lite", "Don't include contents in the manifests.", false)
   .option("--wrap", "Wrap input files with a directory.", true)
+  .option(
+    "--spec-version",
+    "version of the metadata specification to use.",
+    "0.1.0"
+  )
   .option("--target-car-size <size>", "Target size of CAR files.", "32GB")
   .action(createAction("./cmd/pack.js"));
 

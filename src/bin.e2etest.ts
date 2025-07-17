@@ -18,11 +18,10 @@ describe("CLI", function () {
       execaSync(binPath, [
         "pack",
         "-m",
-        "path/to/metadata.json",
+        "testing/inputs/metadata/basic.json",
         "-o",
-        "path/to/output",
-        "path/to/file1",
-        "path/to/file2",
+        "testing/outputs/pack",
+        "testing/inputs/files/basic",
       ])
     );
   });
@@ -32,9 +31,8 @@ describe("CLI", function () {
       execaSync(binPath, [
         "unpack",
         "-o",
-        "path/to/output",
-        "path/to/car1",
-        "path/to/car2",
+        "testing/outputs/unpack",
+        "testing/inputs/packs/basic",
       ])
     );
   });

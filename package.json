@@ -6,6 +6,9 @@
   "license": "Apache-2.0 OR MIT",
   "main": "dist/index.js",
   "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "bin": {
     "filecoin-prep": "./dist/bin.js"
   },
@@ -23,8 +26,8 @@
   "scripts": {
     "build": "npx tsc && chmod a+x dist/bin.js",
     "test": "npm run test:unit",
-    "test:unit": "jest --coverage ./src/cmd",
-    "test:system": "NODE_OPTIONS=--experimental-vm-modules jest ./dist/bin.e2e.test.js",
+    "test:unit": "NODE_OPTIONS=--experimental-vm-modules jest --detectOpenHandles --verbose --coverage --roots ./src  --testPathIgnorePatterns \".(e2etest).\"",
+    "test:system": "rimraf testing/outputs && NODE_OPTIONS=\"--experimental-vm-modules --enable-source-maps\" jest ./dist/bin.e2etest.js",
     "lint": "eslint ./src",
     "lint:fix": "eslint --fix ./src",
     "prettier": "prettier --check ./src ",
@@ -35,10 +38,18 @@
     "dist"
   ],
   "dependencies": {
-    "commander": "^14.0.0"
+    "@ipld/car": "^5.4.2",
+    "@ipld/unixfs": "^3.0.0",
+    "commander": "^14.0.0",
+    "files-from-path": "^1.1.4",
+    "ipfs-car": "^3.0.0",
+    "ipfs-unixfs-importer": "^15.4.0",
+    "mime": "^4.0.7",
+    "multiformats": "^13.3.7"
   },
   "devDependencies": {
-    "@types/jest": "^30.0.0",
+    "@jest/globals": "^29.0.2",
+    "@types/jest": "^29.0.0",
     "@types/node": "^24.0.7",
     "eslint": "^9.30.0",
     "eslint-config-prettier": "^10.1.5",
@@ -46,8 +57,10 @@
     "eslint-plugin-n": "^17.20.0",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "execa": "^9.6.0",
-    "jest": "^30.0.3",
+    "jest": "^29.0.0",
+    "memfs": "^4.17.2",
     "prettier": "^3.6.2",
+    "rimraf": "^6.0.1",
     "ts-jest": "^29.4.0",
     "ts-jest-resolver": "^2.0.1",
     "typescript": "^5.8.3",

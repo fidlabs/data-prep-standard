@@ -35,7 +35,8 @@ all the file system entities (directories and files) contained in each piece of 
 
 Further, to support efficient partial downloads, in each stored piece of the dataset,
 there is a sub-manifest which contains the same metadata as the super-manifest, but with
-only the file system manifest section for that specific piece. Length and offset data also enables range queries should they be wanted.
+only the file system manifest section for that specific piece. Length and offset data also
+enables range queries should they be wanted.
 
 <img width="611" height="750" alt="Data landscape for dataprep project" src="https://github.com/user-attachments/assets/78472a3f-c7b2-41da-a1ed-4bde933f3161" />
 

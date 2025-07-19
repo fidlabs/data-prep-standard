@@ -50,4 +50,4 @@ Feel free to join in. All welcome. [Open an issue](https://github.com/fidlabs/da
 
 ## License
 
-Dual-licensed under [MIT + Apache 2.0](https://github.com/...)
+Dual-licensed under [MIT + Apache 2.0](https://github.com/fidlabs/data-prep-standard/blob/main/LICENSE.md)

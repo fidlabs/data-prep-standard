@@ -1,9 +1,27 @@
+/* eslint-disable n/no-unsupported-features/node-builtins */
+import assert from "node:assert";
+import { createHash } from "node:crypto";
+import { createReadStream } from "node:fs";
+import { join } from "node:path";
+import { Readable } from "node:stream";
+import { pipeline } from "node:stream/promises";
+
 import { FileLike, filesFromPaths } from "files-from-path";
 
-export interface SplitFileLike extends FileLike {
-  originalName: string;
-  offset: number;
+interface originalInfo {
+  name: string;
+  hash: string;
+  size: number;
 }
+
+export interface SplitFileLike extends FileLike {
+  media_type?: string;
+  originalInfo?: originalInfo;
+}
+
+// We split files between CARs if the files are larger than this % of the desired
+// car size.
+const splitFileIfOverPercentage = 5;
 
 /* iterateFilesFromPathsWithSize
  * This function takes an array of file paths and yields batches of files
@@ -26,25 +44,86 @@ export const iterateFilesFromPathsWithSize = async function* (
   let bytes = 0;
   const files: SplitFileLike[] = [];
 
+  const nextBatch = () => {
+    files.length = 0;
+    bytes = 0;
+  };
+
   for (const file of allFiles) {
-    if (bytes + file.size > nBytes) {
+    if (
+      bytes == nBytes ||
+      (file.size > (nBytes * splitFileIfOverPercentage) / 100 &&
+        file.size % nBytes > nBytes - bytes)
+    ) {
+      // Not much room in current batch, start a new one
       yield files;
-      bytes = 0; // Clear the array for the next batch
-      files.length = 0; // Reset the files array
-      if (file.size > nBytes) {
-        // TODO: split the file here
-        throw new Error(
-          `File ${file.name} is too large (${String(file.size)} bytes) to fit in a single batch of ${String(nBytes)} bytes.`
-        );
+      nextBatch();
+    }
+
+    if (bytes + file.size <= nBytes) {
+      // File fits in a batch
+
+      const splitFile: SplitFileLike = {
+        ...file,
+        // TODO: media_type: need to get the full path to the file in a sensible way
+        // media_type: mime.getType(file.name)
+      };
+      files.push(splitFile);
+      bytes += file.size;
+
+      continue;
+    }
+
+    // File is big and needs splitting over multiple batches
+
+    let fileSizeRemaining = file.size;
+    let offset = 0;
+    let part = 0;
+    const lenNumParts = Math.floor((file.size + bytes - 1) / nBytes).toString()
+      .length;
+
+    let hash = "";
+    const hasher = createHash("sha256").setEncoding("hex");
+    hasher.on("readable", () => {
+      // Only one element is going to be produced by the
+      // hash stream.
+      const data = hasher.read() as undefined | Buffer;
+      if (data?.length) {
+        hash = data.toString("hex");
+      }
+    });
+    await pipeline(file.stream(), hasher);
+
+    while (fileSizeRemaining > 0) {
+      const size = Math.min(nBytes - bytes, fileSizeRemaining);
+
+      const splitFile: SplitFileLike = {
+        name: `${file.name}.part.${part.toString().padStart(lenNumParts, "0")}`,
+        size: size,
+        stream: (function (path, start, end) {
+          return () => Readable.toWeb(createReadStream(path, { start, end }));
+        })(join(filePaths[0] ?? "", file.name), offset, offset + size),
+        originalInfo: {
+          name: file.name,
+          hash,
+          size: file.size,
+        },
+      };
+
+      files.push(splitFile);
+      bytes += size;
+      offset += size;
+      fileSizeRemaining -= size;
+      part++;
+
+      assert(bytes <= nBytes);
+
+      if (bytes === nBytes && fileSizeRemaining > 0) {
+        // We filled another batch and there is more to come
+        yield files;
+        nextBatch();
       }
     }
-    const splitFile: SplitFileLike = {
-      ...file,
-      originalName: file.name,
-      offset: 0, // Offset is 0 for the first part of a split file
-    };
-    files.push(splitFile);
-    bytes += file.size;
   }
   yield files; // Yield the last batch of files
 };

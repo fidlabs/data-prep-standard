@@ -8,42 +8,88 @@ export interface UserMetadata {
   tags?: string[];
 }
 
-export interface ManifestContentDirectory {
-  type: "directory";
-  name: string;
-  cid: string;
-  contents: ManifestContentEntry[];
-}
-
-export interface ManifestContentFile {
-  type: "file";
-  name: string;
-  byte_length: number;
-  cid: string;
-  content_type?: string;
-}
-
-export type ManifestContentEntry =
-  | ManifestContentDirectory
-  | ManifestContentFile;
-
 interface ManifestBase extends UserMetadata {
   "@spec": string;
   "@spec_version": string;
   uuid: string;
 }
 
-export interface SuperManifest extends ManifestBase {
-  n_pieces: number;
-  pieces: [
-    {
-      piece_cid: string;
-      payload_cid: string;
-      contents: ManifestContentEntry[];
-    },
-  ];
+export interface SuperManifestContentDirectory {
+  "@type": "directory";
+  name: string;
+  contents: SuperManifestContentEntry[];
 }
 
+export interface SuperManifestContentFile {
+  "@type": "file";
+  name: string;
+  hash: string;
+  byte_length: number;
+  cid: string;
+  piece_cid: string;
+  media_type?: string;
+}
+
+export interface SuperManifestContentSplitFile {
+  "@type": "split-file";
+  name: string;
+  hash: string;
+  byte_length: number;
+  media_type?: string;
+  parts: SuperManifestFilePart[];
+}
+
+export interface SuperManifestContentFilePart {
+  name: string;
+  byte_length: number;
+  cid: string;
+  piece_cid: string;
+}
+
+export type SuperManifestContentEntry =
+  | SuperManifestContentDirectory
+  | SuperManifestContentFile
+  | SuperManifestContentSplitFile;
+
+export interface SuperManifest extends ManifestBase {
+  n_pieces: number;
+  pieces: {
+    piece_cid: string;
+    payload_cid: string;
+  }[];
+  contents?: SuperManifestContentEntry[];
+}
+
+export interface SubManifestContentDirectory {
+  "@type": "directory";
+  name: string;
+  contents: SubManifestContentEntry[];
+}
+
+export interface SubManifestContentFile {
+  "@type": "file";
+  name: string;
+  hash: string;
+  byte_length: number;
+  cid: string;
+  media_type?: string;
+}
+
+export interface SubManifestContentFilePart {
+  "@type": "file-part";
+  name: string;
+  byte_length: number;
+  cid: string;
+  original_file_name: string;
+  original_file_hash: string;
+  original_file_byte_length: number;
+}
+
+export type SubManifestContentEntry =
+  | SubManifestContentDirectory
+  | SubManifestContentFile
+  | SubManifestContentFilePart;
+
 export interface SubManifest extends ManifestBase {
-  contents: ManifestContentEntry[];
+  contents?: SubManifestContentEntry[];
 }

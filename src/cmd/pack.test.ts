@@ -46,15 +46,11 @@ const basicFilesGenerator = async function* (
     resolve([
       {
         name: "file1.txt",
-        originalName: "file1.txt",
-        offset: 0,
         stream: () => Readable.toWeb(Readable.from("Hello World")),
         size: 11,
       },
       {
         name: "file2.txt",
-        originalName: "file2.txt",
-        offset: 0,
         stream: () => Readable.toWeb(Readable.from("Another file")),
         size: 13,
       },

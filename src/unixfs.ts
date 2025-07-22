@@ -1,7 +1,6 @@
 /* eslint-disable n/no-unsupported-features/node-builtins */
-import { createHash } from "node:crypto";
+import { createHash, type Hash } from "node:crypto";
 import { Readable } from "node:stream";
-import { pipeline } from "node:stream/promises";
 
 import type { Block, View } from "@ipld/unixfs";
 import * as UnixFS from "@ipld/unixfs";
@@ -51,38 +50,18 @@ class UnixFsFileBuilder {
     manifest: SubManifestContentEntry[] | undefined
   ) {
     const unixfsFileWriter = UnixFS.createFileWriter(writer);
-    let stream = this.#file.stream();
-    let hash = "";
-    const promises: Promise<void>[] = [];
+    const stream = this.#file.stream();
+    const hasher = createHash("sha256")
 
-    if (!this.#file.originalInfo && manifest) {
-      // This is whole file, so we need to hash it
-      const [a, b] = stream.tee();
-      stream = a;
-
-      const hasher = createHash("sha256").setEncoding("hex");
-      hasher.on("readable", () => {
-        // Only one element is going to be produced by the
-        // hash stream.
-        const data = hasher.read() as undefined | Buffer;
-        if (data?.length) {
-          hash = data.toString("hex");
-        }
-      });
-      promises.push(pipeline(b, hasher));
-    }
-
-    promises.push(
-      stream.pipeTo(
+    await stream.pipeTo(
         new WritableStream({
           async write(chunk: Uint8Array) {
+            hasher.update(chunk);
             await unixfsFileWriter.write(chunk);
           },
         })
       )
-    );
 
-    await Promise.all(promises);
     // Note: added await here, check on performance implications
     const link = await unixfsFileWriter.close();
 
@@ -91,7 +70,7 @@ class UnixFsFileBuilder {
         "@type": "file",
         name: this.#file.name,
         cid: link.cid.toString(),
-        hash,
+        hash: hasher.digest("hex"),
         byte_length: link.contentByteLength,
         media_type: this.#file.media_type,
       });

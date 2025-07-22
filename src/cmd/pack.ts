@@ -42,6 +42,7 @@ export default async function pack(
     output: string;
     metadata: string;
     specVersion: string;
+    targetCarSize?: string;
   }
 ) {
   console.log("pack", filePaths, opts);

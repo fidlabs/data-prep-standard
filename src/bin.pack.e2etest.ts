@@ -74,6 +74,8 @@ describe("pack", function () {
     const filesPath = join("testing", "generated", "pack.e2e.ManyFiles");
     if (!existsSync(filesPath)) {
       await mkFileTree(filesPath, {
+        // we would like to test with a million files, but there is
+        // not enough disk space on the CI to do that, so we use 1000 instead
         nFiles: 1 * 1000, // * 1000,
         minSize: 1,
         maxSize: 1 * 1024,
@@ -88,6 +90,8 @@ describe("pack", function () {
     if (!existsSync(filesPath)) {
       await mkFileTree(filesPath, {
         nFiles: 1,
+        // we would like to test a file that is larger than 32GB, but there is
+        // not enough disk space on the CI to do that, so we use 36MB instead
         minSize: 36 * 1024 * 1024, // * 1024,
         maxSize: 36 * 1024 * 1024, // * 1024,
         maxDepth: 1,

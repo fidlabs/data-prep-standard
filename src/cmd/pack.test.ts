@@ -4,8 +4,6 @@ import { cwd } from "node:process";
 import { describe, expect, jest, test } from "@jest/globals";
 import { memfs } from "memfs";
 
-// import type { SplitFileLike } from "../files.js";
-
 const { fs, vol } = memfs();
 
 jest.unstable_mockModule("node:fs", () => ({

@@ -115,7 +115,7 @@ describe("pack", function () {
   );
 
   test(
-    "pack one huge files",
+    "pack one huge file",
     () => {
       expect(() => {
         const { stdout } = execaSync(binPath, [

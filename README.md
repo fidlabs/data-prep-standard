@@ -15,7 +15,7 @@ that does not necessarily help a user to find and download other similar dataset
 
 This project provides an *interoperable* and *standardized* data set manifest and a
 standardized method of preparing data to produce that manifest. Between these and a
-refernce implementation of data prep tooling, it becomes easy for motivated actors to
+reference implementation of data prep tooling, it becomes easy for motivated actors to
 store data sets on Filecoin and provide an easy way for them - and potentially 3rd
 parties - to identify, download and use the data set once stored on Filecoin.
 

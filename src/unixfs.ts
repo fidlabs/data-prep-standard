@@ -1,5 +1,5 @@
 /* eslint-disable n/no-unsupported-features/node-builtins */
-import { createHash, type Hash } from "node:crypto";
+import { createHash } from "node:crypto";
 import { Readable } from "node:stream";
 
 import type { Block, View } from "@ipld/unixfs";
@@ -51,19 +51,25 @@ class UnixFsFileBuilder {
   ) {
     const unixfsFileWriter = UnixFS.createFileWriter(writer);
     const stream = this.#file.stream();
-    const hasher = createHash("sha256")
+    const hasher = createHash("sha256");
 
     await stream.pipeTo(
-        new WritableStream({
-          async write(chunk: Uint8Array) {
-            hasher.update(chunk);
-            await unixfsFileWriter.write(chunk);
-          },
-        })
-      )
+      new WritableStream({
+        async write(chunk: Uint8Array) {
+          hasher.update(chunk);
+          await unixfsFileWriter.write(chunk);
+        },
+      })
+    );
 
     // Note: added await here, check on performance implications
     const link = await unixfsFileWriter.close();
+
+    if (this.#file.size !== link.contentByteLength) {
+      throw new Error(
+        `File size mismatch: expected ${String(this.#file.size)}, got ${String(link.contentByteLength)}`
+      );
+    }
 
     if (!this.#file.originalInfo) {
       manifest?.push({

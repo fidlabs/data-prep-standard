@@ -27,20 +27,19 @@ const { iterateFilesFromPathsWithSize } = await import("./files.js");
 
 describe("testing files functions", () => {
   test("simple happy day", async () => {
-    mocked_filesFromPaths.mockImplementationOnce(async (paths, options) => {
+    mocked_filesFromPaths.mockImplementationOnce(async (paths) => {
       expect(paths).toEqual(expect.arrayContaining(["test"]));
-      expect(options).toBeUndefined();
       return new Promise((resolve) => {
         resolve([
           {
             name: "file1.txt",
             stream: () => Readable.toWeb(Readable.from("Hello World")),
-            size: 11,
+            size: 10,
           },
           {
             name: "file2.txt",
             stream: () => Readable.toWeb(Readable.from("Another file")),
-            size: 13,
+            size: 12,
           },
         ]);
       });
@@ -57,14 +56,16 @@ describe("testing files functions", () => {
       expect(files1.value[0]).toBeDefined();
       if (files1.value[0]) {
         expect(files1.value[0].name).toBe("file1.txt");
-        expect(await text(files1.value[0].stream())).toBe("Hello World");
         expect(files1.value[0].originalInfo).toBeUndefined();
+        expect(files1.value[0].size).toBe(10);
+        expect(await text(files1.value[0].stream())).toBe("Hello World");
       }
       expect(files1.value[1]).toBeDefined();
       if (files1.value[1]) {
         expect(files1.value[1].name).toBe("file2.txt");
-        expect(await text(files1.value[1].stream())).toBe("Another file");
         expect(files1.value[1].originalInfo).toBeUndefined();
+        expect(files1.value[1].size).toBe(12);
+        expect(await text(files1.value[1].stream())).toBe("Another file");
       }
     }
 
@@ -74,20 +75,19 @@ describe("testing files functions", () => {
   });
 
   test("split list happy day", async () => {
-    mocked_filesFromPaths.mockImplementationOnce(async (paths, options) => {
+    mocked_filesFromPaths.mockImplementationOnce(async (paths) => {
       expect(paths).toEqual(expect.arrayContaining(["test"]));
-      expect(options).toBeUndefined();
       return new Promise((resolve) => {
         resolve([
           {
             name: "file1.txt",
             stream: () => Readable.toWeb(Readable.from("Hello World")),
-            size: 11,
+            size: 10,
           },
           {
             name: "file2.txt",
             stream: () => Readable.toWeb(Readable.from("Final file")),
-            size: 10,
+            size: 9,
           },
         ]);
       });
@@ -104,8 +104,9 @@ describe("testing files functions", () => {
       expect(files1.value[0]).toBeDefined();
       if (files1.value[0]) {
         expect(files1.value[0].name).toBe("file1.txt");
-        expect(await text(files1.value[0].stream())).toBe("Hello World");
         expect(files1.value[0].originalInfo).toBeUndefined();
+        expect(files1.value[0].size).toBe(10);
+        expect(await text(files1.value[0].stream())).toBe("Hello World");
       }
     }
 
@@ -118,8 +119,9 @@ describe("testing files functions", () => {
       expect(files2.value[0]).toBeDefined();
       if (files2.value[0]) {
         expect(files2.value[0].name).toBe("file2.txt");
-        expect(await text(files2.value[0].stream())).toBe("Final file");
         expect(files2.value[0].originalInfo).toBeUndefined();
+        expect(files2.value[0].size).toBe(9);
+        expect(await text(files2.value[0].stream())).toBe("Final file");
       }
     }
 
@@ -129,35 +131,32 @@ describe("testing files functions", () => {
   });
 
   test("split file", async () => {
-    mocked_filesFromPaths.mockImplementationOnce(async (paths, options) => {
+    mocked_filesFromPaths.mockImplementationOnce(async (paths) => {
       expect(paths).toEqual(expect.arrayContaining(["test"]));
-      expect(options).toBeUndefined();
       return new Promise((resolve) => {
         resolve([
           {
             name: "file1.txt",
             stream: () => Readable.toWeb(Readable.from("Hello World")),
-            size: 11,
+            size: 10,
           },
           {
             name: "file2.txt",
             stream: () => Readable.toWeb(Readable.from("Another file")),
-            size: 13,
+            size: 12,
           },
         ]);
       });
     });
-    mocked_createReadStream.mockImplementation(
-      (_name, options) =>
-        Readable.from(
-          "Another file".slice(
-            (options as undefined | { start?: number })?.start,
-            (options as undefined | { end?: number })?.end
-          )
-        ) as ReadStream
-    );
+    mocked_createReadStream.mockImplementation((_name, options) => {
+      const start = (options as undefined | { start?: number })?.start ?? 0;
+      const end = ((options as undefined | { end?: number })?.end ?? 0) + 1;
+      // end + 1 because the end is inclusive in the createReadStream options
+      // and exclusive in the slice method
+      return Readable.from("Another file".slice(start, end)) as ReadStream;
+    });
 
-    const generator = iterateFilesFromPathsWithSize(["test"], 12);
+    const generator = iterateFilesFromPathsWithSize(["test"], 11);
 
     const files1 = await generator.next();
     expect(files1.done).toBeFalsy();
@@ -168,15 +167,17 @@ describe("testing files functions", () => {
       expect(files1.value[0]).toBeDefined();
       if (files1.value[0]) {
         expect(files1.value[0].name).toBe("file1.txt");
-        expect(await text(files1.value[0].stream())).toBe("Hello World");
-        expect(files1.value[0].name).toBe("file1.txt");
+        expect(files1.value[0].size).toBe(10);
         expect(files1.value[0].originalInfo).toBeUndefined();
+        expect(await text(files1.value[0].stream())).toBe("Hello World");
       }
       expect(files1.value[1]).toBeDefined();
       if (files1.value[1]) {
         expect(files1.value[1].name).toBe("file2.txt.part.0");
-        expect(await text(files1.value[1].stream())).toBe("A");
         expect(files1.value[1].originalInfo?.name).toBe("file2.txt");
+        expect(files1.value[1].originalInfo?.size).toBe(12);
+        expect(files1.value[1].size).toBe(1);
+        expect(await text(files1.value[1].stream())).toBe("A");
       }
     }
 
@@ -189,8 +190,10 @@ describe("testing files functions", () => {
       expect(files2.value[0]).toBeDefined();
       if (files2.value[0]) {
         expect(files2.value[0].name).toBe("file2.txt.part.1");
-        expect(await text(files2.value[0].stream())).toBe("nother file");
         expect(files2.value[0].originalInfo?.name).toBe("file2.txt");
+        expect(files2.value[0].originalInfo?.size).toBe(12);
+        expect(files2.value[0].size).toBe(11);
+        expect(await text(files2.value[0].stream())).toBe("nother file");
       }
     }
 
@@ -200,52 +203,70 @@ describe("testing files functions", () => {
   });
 
   test("split tiny files", async () => {
-    mocked_filesFromPaths.mockImplementationOnce(async (paths, options) => {
+    mocked_filesFromPaths.mockImplementationOnce(async (paths) => {
       expect(paths).toEqual(expect.arrayContaining(["test"]));
-      expect(options).toBeUndefined();
       return new Promise((resolve) => {
         resolve([
           {
             name: "file1.txt",
             stream: () => Readable.toWeb(Readable.from("Hello World")),
-            size: 11,
+            size: 10,
           },
           {
             name: "file2.txt",
             stream: () => Readable.toWeb(Readable.from("Another file")),
-            size: 13,
+            size: 12,
           },
         ]);
       });
     });
+    mocked_createReadStream.mockImplementation((name, options) => {
+      let content = "Hello World";
+      if (name === "test/file2.txt") {
+        content = "Another file";
+      }
+      const start = (options as undefined | { start?: number })?.start ?? 0;
+      const end = ((options as undefined | { end?: number })?.end ?? 0) + 1;
+      // end + 1 because the end is inclusive in the createReadStream options
+      // and exclusive in the slice method
+      return Readable.from(content.slice(start, end)) as ReadStream;
+    });
 
     const generator = iterateFilesFromPathsWithSize(["test"], 1);
 
-    for (let i = 0; i < 11; i++) {
+    for (let i = 0; i < 10; i++) {
       const files1 = await generator.next();
       expect(files1.done).toBeFalsy();
       expect(files1.value).toBeDefined();
 
       if (files1.value) {
         expect(files1.value).toHaveLength(1);
-        expect(files1.value[0]?.name).toBe(
-          `file1.txt.part.${i.toString().padStart(2, "0")}`
-        );
-        expect(files1.value[0]?.originalInfo?.name).toBe("file1.txt");
+        expect(files1.value[0]).toBeDefined();
+        if (files1.value[0]) {
+          expect(files1.value[0].name).toBe(
+            `file1.txt.part.${i.toString().padStart(1, "0")}`
+          );
+          expect(files1.value[0].originalInfo?.name).toBe("file1.txt");
+          expect(await text(files1.value[0].stream())).toBe("Hello World"[i]);
+        }
       }
     }
 
-    for (let i = 0; i < 13; i++) {
+    for (let i = 0; i < 12; i++) {
       const files1 = await generator.next();
       expect(files1.done).toBeFalsy();
       expect(files1.value).toBeDefined();
 
       if (files1.value) {
         expect(files1.value).toHaveLength(1);
-        expect(files1.value[0]?.name).toBe(
-          `file2.txt.part.${i.toString().padStart(2, "0")}`
-        );
-        expect(files1.value[0]?.originalInfo?.name).toBe("file2.txt");
+        expect(files1.value[0]).toBeDefined();
+        if (files1.value[0]) {
+          expect(files1.value[0].name).toBe(
+            `file2.txt.part.${i.toString().padStart(2, "0")}`
+          );
+          expect(files1.value[0].originalInfo?.name).toBe("file2.txt");
+          expect(await text(files1.value[0].stream())).toBe("Another file"[i]);
+        }
       }
     }
     const files3 = await generator.next();

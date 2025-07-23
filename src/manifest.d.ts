@@ -73,6 +73,7 @@ export interface SubManifestContentFile {
   byte_length: number;
   cid: string;
   media_type?: string;
+  // Can we get byte offset of the entire file in the CAR binary?
 }
 
 export interface SubManifestContentFilePart {
@@ -83,6 +84,7 @@ export interface SubManifestContentFilePart {
   original_file_name: string;
   original_file_hash: string;
   original_file_byte_length: number;
+  // Can we get byte offset of the entire part in the CAR binary?
 }
 
 export type SubManifestContentEntry =

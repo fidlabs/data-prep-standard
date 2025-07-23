@@ -94,7 +94,3 @@ function createAction(modulePath: string) {
     return module.default(...args);
   };
 }
-
-process.on("uncaughtException", function (err: unknown) {
-  console.error(String(err));
-});

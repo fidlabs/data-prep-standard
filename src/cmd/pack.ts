@@ -24,6 +24,7 @@ import type {
   SuperManifestContentEntry,
   UserMetadata,
 } from "../manifest.d.js";
+import parseBytes from "../parseBytes.js";
 import { createDirectoryEncoderStream } from "../unixfs.js";
 
 // Root CID written in CAR file header before it is updated with the real root CID.
@@ -42,10 +43,11 @@ export default async function pack(
     output: string;
     metadata: string;
     specVersion: string;
-    targetCarSize?: string;
+    targetCarSize: string;
   }
 ) {
-  console.log("pack", filePaths, opts);
+  const targetCarSize = parseBytes(opts.targetCarSize);
+  console.log("pack", filePaths, opts, targetCarSize);
 
   if (opts.specVersion !== "0.1.0") {
     throw new Error(
@@ -68,7 +70,10 @@ export default async function pack(
   const subManifests: { rootCID: CID; subManifest: SubManifest }[] = [];
   let nPiece = 0;
 
-  for await (const files of iterateFilesFromPathsWithSize(filePaths)) {
+  for await (const files of iterateFilesFromPathsWithSize(
+    filePaths,
+    targetCarSize
+  )) {
     let rootCID = placeholderCID;
 
     console.log(

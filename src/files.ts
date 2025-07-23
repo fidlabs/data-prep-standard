@@ -2,6 +2,7 @@
 import assert from "node:assert";
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
+import { readdir, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
@@ -40,7 +41,9 @@ export const iterateFilesFromPathsWithSize = async function* (
   filePaths: string[],
   nBytes = 31 * 1024 * 1024 * 1024
 ): AsyncGenerator<SplitFileLike[], void, void> {
-  const allFiles = await filesFromPaths(filePaths);
+  const allFiles = await filesFromPaths(filePaths, {
+    fs: { createReadStream, promises: { readdir, stat } },
+  });
   let bytes = 0;
   const files: SplitFileLike[] = [];
 
@@ -96,13 +99,16 @@ export const iterateFilesFromPathsWithSize = async function* (
 
     while (fileSizeRemaining > 0) {
       const size = Math.min(nBytes - bytes, fileSizeRemaining);
+      // console.log(
+      //   `Splitting file ${file.name} into part ${part} of size ${size}`
+      // );
 
       const splitFile: SplitFileLike = {
         name: `${file.name}.part.${part.toString().padStart(lenNumParts, "0")}`,
         size: size,
         stream: (function (path, start, end) {
           return () => Readable.toWeb(createReadStream(path, { start, end }));
-        })(join(filePaths[0] ?? "", file.name), offset, offset + size),
+        })(join(filePaths[0] ?? "", file.name), offset, offset + size - 1),
         originalInfo: {
           name: file.name,
           hash,

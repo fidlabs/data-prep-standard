@@ -81,7 +81,7 @@ describe("pack", function () {
         maxName: 80,
       });
     }
-  }, 600 * 1000);
+  });
 
   beforeAll(async () => {
     const filesPath = join("testing", "generated", "pack.e2e.HugeFile");
@@ -94,7 +94,7 @@ describe("pack", function () {
         maxName: 20,
       });
     }
-  }, 600 * 1000);
+  });
 
   test(
     "pack many files",
@@ -110,8 +110,7 @@ describe("pack", function () {
           "testing/generated/pack.e2e.ManyFiles",
         ]);
       }).not.toThrow();
-    },
-    600 * 1000
+    }
   );
 
   test(
@@ -130,7 +129,6 @@ describe("pack", function () {
         ]);
         console.log("stdout:", stdout);
       }).not.toThrow();
-    },
-    600 * 1000
+    }
   );
 });

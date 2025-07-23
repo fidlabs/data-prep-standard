@@ -100,39 +100,33 @@ describe("pack", function () {
     }
   });
 
-  test(
-    "pack many files",
-    () => {
-      expect(() => {
-        execaSync(binPath, [
-          "pack",
-          "-m",
-          "testing/inputs/metadata/basic.json",
-          "-l",
-          "-o",
-          "testing/outputs/pack.e2e.ManyFiles",
-          "testing/generated/pack.e2e.ManyFiles",
-        ]);
-      }).not.toThrow();
-    }
-  );
+  test("pack many files", () => {
+    expect(() => {
+      execaSync(binPath, [
+        "pack",
+        "-m",
+        "testing/inputs/metadata/basic.json",
+        "-l",
+        "-o",
+        "testing/outputs/pack.e2e.ManyFiles",
+        "testing/generated/pack.e2e.ManyFiles",
+      ]);
+    }).not.toThrow();
+  });
 
-  test(
-    "pack one huge file",
-    () => {
-      expect(() => {
-        const { stdout } = execaSync(binPath, [
-          "pack",
-          "-m",
-          "testing/inputs/metadata/basic.json",
-          "--target-car-size",
-          "31MiB",
-          "-o",
-          "testing/outputs/pack.e2e.HugeFile",
-          "testing/generated/pack.e2e.HugeFile",
-        ]);
-        console.log("stdout:", stdout);
-      }).not.toThrow();
-    }
-  );
+  test("pack one huge file", () => {
+    expect(() => {
+      const { stdout } = execaSync(binPath, [
+        "pack",
+        "-m",
+        "testing/inputs/metadata/basic.json",
+        "--target-car-size",
+        "31MiB",
+        "-o",
+        "testing/outputs/pack.e2e.HugeFile",
+        "testing/generated/pack.e2e.HugeFile",
+      ]);
+      console.log("stdout:", stdout);
+    }).not.toThrow();
+  });
 });

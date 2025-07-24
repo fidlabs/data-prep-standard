@@ -100,6 +100,16 @@ export interface SubManifest extends ManifestBase {
   contents?: SubManifestContentEntry[];
 }
 
+function specFromVersion(version: string): string {
+  const match = /^([0-9]+)\./.exec(version);
+
+  if (!match || match.length !== 2 || match[1] === undefined) {
+    throw new Error(`Invalid spec version: ${version}`);
+  }
+
+  return `https://raw.githubusercontent.com/fidlabs/data-prep-standard/refs/heads/main/specification/v${match[1]}/FilecoinDataPreparationManifestSpecification.md`;
+}
+
 export class Manifest implements SuperManifest {
   "@spec": string;
   "@spec_version": string;
@@ -129,8 +139,7 @@ export class Manifest implements SuperManifest {
     }
 
     this["@spec_version"] = specVersion;
-    this["@spec"] =
-      `https://raw.githubusercontent.com/fidlabs/data-prep-standard/refs/heads/main/specification/v0/FilecoinDataPreparationManifestSpecification.md`;
+    this["@spec"] = specFromVersion(specVersion);
     this.uuid = randomUUID();
     this.name = metadata.name;
     this.description = metadata.description;

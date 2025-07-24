@@ -22,7 +22,7 @@ export interface SplitFileLike extends FileLike {
 
 // We split files between CARs if the files are larger than this % of the desired
 // car size.
-const splitFileIfOverPercentage = 5;
+const splitFileIfOverPercentage = 50;
 
 /* iterateFilesFromPathsWithSize
  * This function takes an array of file paths and yields batches of files

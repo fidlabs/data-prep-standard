@@ -332,9 +332,11 @@ describe("super manifest", () => {
     expect(() => {
       manifest.addPiece(
         subManifest,
-        CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u"),
+        CID.parse(
+          "bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u"
+        ),
         CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
-      )
+      );
     }).toThrow();
   });
 });

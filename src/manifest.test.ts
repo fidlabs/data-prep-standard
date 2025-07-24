@@ -338,7 +338,7 @@ describe("super manifest", () => {
     );
   });
 
-  test("merge piece with bad entry", () => {
+  test("add piece with bad entry", () => {
     const manifest = new Manifest(
       {
         name: "Test Manifest",

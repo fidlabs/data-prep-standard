@@ -102,7 +102,7 @@ describe("pack", function () {
 
   test("pack many files", () => {
     expect(() => {
-      execaSync(binPath, [
+      const { stdout } = execaSync(binPath, [
         "pack",
         "-m",
         "testing/inputs/metadata/basic.json",
@@ -111,6 +111,7 @@ describe("pack", function () {
         "testing/outputs/pack.e2e.ManyFiles",
         "testing/generated/pack.e2e.ManyFiles",
       ]);
+      console.log("stdout:", stdout);
     }).not.toThrow();
   });
 

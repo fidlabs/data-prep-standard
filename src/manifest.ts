@@ -100,8 +100,8 @@ export interface SubManifest extends ManifestBase {
   contents?: SubManifestContentEntry[];
 }
 
-function specFromVersion(version: string): string {
-  const match = /^([0-9]+)\./.exec(version);
+export function specFromVersion(version: string): string {
+  const match = /^([0-9]+)\.[0-9]+\.[0-9]+$/.exec(version);
 
   if (!match || match.length !== 2 || match[1] === undefined) {
     throw new Error(`Invalid spec version: ${version}`);

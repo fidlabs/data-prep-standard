@@ -126,6 +126,40 @@ describe("super manifest", () => {
     );
   });
 
+  test("piece with contents in lite mode", () => {
+    const manifest = new Manifest(
+      {
+        name: "Test Manifest",
+        description: "This is a test manifest",
+        version: "1.0.0",
+        license: "MIT",
+        project_url: "https://example.com",
+        open_with: "test-app",
+        tags: ["test", "manifest"],
+      },
+      "0.1.0",
+      { lite: true }
+    );
+    const subManifest = manifest.newSubManifest();
+    subManifest.contents = [
+      {
+        "@type": "file",
+        name: "test.txt",
+        cid: "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+        hash: "1234567890abcdef",
+        byte_length: 1234,
+      },
+    ];
+
+    manifest.addPiece(
+      subManifest,
+      CID.parse("bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"),
+      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
+    );
+
+    expect(manifest.contents).toBeUndefined();
+  });
+
   test("merge pieces with different parts of the same file", () => {
     const manifest = new Manifest(
       {

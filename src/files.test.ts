@@ -53,18 +53,24 @@ describe("testing files functions", () => {
 
     if (files1.value) {
       expect(files1.value).toHaveLength(2);
-      expect(files1.value[0]).toBeDefined();
+      expect(files1.value[0]).toEqual(
+        expect.objectContaining({
+          name: "file1.txt",
+          size: 10,
+          stream: expect.any(Function),
+        })
+      );
       if (files1.value[0]) {
-        expect(files1.value[0].name).toBe("file1.txt");
-        expect(files1.value[0].originalInfo).toBeUndefined();
-        expect(files1.value[0].size).toBe(10);
         expect(await text(files1.value[0].stream())).toBe("Hello World");
       }
-      expect(files1.value[1]).toBeDefined();
+      expect(files1.value[1]).toEqual(
+        expect.objectContaining({
+          name: "file2.txt",
+          size: 12,
+          stream: expect.any(Function),
+        })
+      );
       if (files1.value[1]) {
-        expect(files1.value[1].name).toBe("file2.txt");
-        expect(files1.value[1].originalInfo).toBeUndefined();
-        expect(files1.value[1].size).toBe(12);
         expect(await text(files1.value[1].stream())).toBe("Another file");
       }
     }
@@ -101,11 +107,14 @@ describe("testing files functions", () => {
 
     if (files1.value) {
       expect(files1.value).toHaveLength(1);
-      expect(files1.value[0]).toBeDefined();
+      expect(files1.value[0]).toEqual(
+        expect.objectContaining({
+          name: "file1.txt",
+          size: 10,
+          stream: expect.any(Function),
+        })
+      );
       if (files1.value[0]) {
-        expect(files1.value[0].name).toBe("file1.txt");
-        expect(files1.value[0].originalInfo).toBeUndefined();
-        expect(files1.value[0].size).toBe(10);
         expect(await text(files1.value[0].stream())).toBe("Hello World");
       }
     }
@@ -116,11 +125,14 @@ describe("testing files functions", () => {
 
     if (files2.value) {
       expect(files2.value).toHaveLength(1);
-      expect(files2.value[0]).toBeDefined();
+      expect(files2.value[0]).toEqual(
+        expect.objectContaining({
+          name: "file2.txt",
+          size: 9,
+          stream: expect.any(Function),
+        })
+      );
       if (files2.value[0]) {
-        expect(files2.value[0].name).toBe("file2.txt");
-        expect(files2.value[0].originalInfo).toBeUndefined();
-        expect(files2.value[0].size).toBe(9);
         expect(await text(files2.value[0].stream())).toBe("Final file");
       }
     }
@@ -164,19 +176,29 @@ describe("testing files functions", () => {
 
     if (files1.value) {
       expect(files1.value).toHaveLength(2);
-      expect(files1.value[0]).toBeDefined();
+      expect(files1.value[0]).toEqual(
+        expect.objectContaining({
+          name: "file1.txt",
+          size: 10,
+          stream: expect.any(Function),
+        })
+      );
       if (files1.value[0]) {
-        expect(files1.value[0].name).toBe("file1.txt");
-        expect(files1.value[0].size).toBe(10);
-        expect(files1.value[0].originalInfo).toBeUndefined();
         expect(await text(files1.value[0].stream())).toBe("Hello World");
       }
-      expect(files1.value[1]).toBeDefined();
+      expect(files1.value[1]).toEqual(
+        expect.objectContaining({
+          name: "file2.txt.part.0",
+          originalInfo: {
+            name: "file2.txt",
+            size: 12,
+            hash: expect.any(String),
+          },
+          size: 1,
+          stream: expect.any(Function),
+        })
+      );
       if (files1.value[1]) {
-        expect(files1.value[1].name).toBe("file2.txt.part.0");
-        expect(files1.value[1].originalInfo?.name).toBe("file2.txt");
-        expect(files1.value[1].originalInfo?.size).toBe(12);
-        expect(files1.value[1].size).toBe(1);
         expect(await text(files1.value[1].stream())).toBe("A");
       }
     }
@@ -187,12 +209,19 @@ describe("testing files functions", () => {
 
     if (files2.value) {
       expect(files2.value).toHaveLength(1);
-      expect(files2.value[0]).toBeDefined();
+      expect(files2.value[0]).toEqual(
+        expect.objectContaining({
+          name: "file2.txt.part.1",
+          originalInfo: {
+            name: "file2.txt",
+            size: 12,
+            hash: expect.any(String),
+          },
+          size: 11,
+          stream: expect.any(Function),
+        })
+      );
       if (files2.value[0]) {
-        expect(files2.value[0].name).toBe("file2.txt.part.1");
-        expect(files2.value[0].originalInfo?.name).toBe("file2.txt");
-        expect(files2.value[0].originalInfo?.size).toBe(12);
-        expect(files2.value[0].size).toBe(11);
         expect(await text(files2.value[0].stream())).toBe("nother file");
       }
     }
@@ -241,12 +270,19 @@ describe("testing files functions", () => {
 
       if (files1.value) {
         expect(files1.value).toHaveLength(1);
-        expect(files1.value[0]).toBeDefined();
+        expect(files1.value[0]).toEqual(
+          expect.objectContaining({
+            name: `file1.txt.part.${i.toString().padStart(1, "0")}`,
+            originalInfo: {
+              name: "file1.txt",
+              size: 10,
+              hash: expect.any(String),
+            },
+            size: 1,
+            stream: expect.any(Function),
+          })
+        );
         if (files1.value[0]) {
-          expect(files1.value[0].name).toBe(
-            `file1.txt.part.${i.toString().padStart(1, "0")}`
-          );
-          expect(files1.value[0].originalInfo?.name).toBe("file1.txt");
           expect(await text(files1.value[0].stream())).toBe("Hello World"[i]);
         }
       }
@@ -259,12 +295,19 @@ describe("testing files functions", () => {
 
       if (files1.value) {
         expect(files1.value).toHaveLength(1);
-        expect(files1.value[0]).toBeDefined();
+        expect(files1.value[0]).toEqual(
+          expect.objectContaining({
+            name: `file2.txt.part.${i.toString().padStart(2, "0")}`,
+            originalInfo: {
+              name: "file2.txt",
+              size: 12,
+              hash: expect.any(String),
+            },
+            size: 1,
+            stream: expect.any(Function),
+          })
+        );
         if (files1.value[0]) {
-          expect(files1.value[0].name).toBe(
-            `file2.txt.part.${i.toString().padStart(2, "0")}`
-          );
-          expect(files1.value[0].originalInfo?.name).toBe("file2.txt");
           expect(await text(files1.value[0].stream())).toBe("Another file"[i]);
         }
       }

@@ -1,4 +1,5 @@
 /* eslint-disable n/no-unsupported-features/node-builtins */
+import { createHash } from "node:crypto";
 import { Readable } from "node:stream";
 
 import type { Block, View } from "@ipld/unixfs";
@@ -9,8 +10,8 @@ import * as raw from "multiformats/codecs/raw";
 
 import type { SplitFileLike } from "./files.js";
 import type {
-  ManifestContentEntry,
   SubManifest,
+  SubManifestContentEntry,
   UserMetadata,
 } from "./manifest.d.js";
 
@@ -40,28 +41,58 @@ const defaultSettings = UnixFS.configure({
 class UnixFsFileBuilder {
   #file;
 
-  constructor(file: { name: string; stream: () => ReadableStream }) {
+  constructor(file: SplitFileLike) {
     this.#file = file;
   }
 
-  async finalize(writer: View, manifest: ManifestContentEntry[]) {
+  async finalize(
+    writer: View,
+    manifest: SubManifestContentEntry[] | undefined
+  ) {
     const unixfsFileWriter = UnixFS.createFileWriter(writer);
-    await this.#file.stream().pipeTo(
+    const stream = this.#file.stream();
+    const hasher = createHash("sha256");
+
+    await stream.pipeTo(
       new WritableStream({
         async write(chunk: Uint8Array) {
+          hasher.update(chunk);
           await unixfsFileWriter.write(chunk);
         },
       })
     );
+
     // Note: added await here, check on performance implications
     const link = await unixfsFileWriter.close();
-    manifest.push({
-      type: "file",
-      name: this.#file.name,
-      cid: link.cid.toString(),
-      byte_length: link.contentByteLength,
-      // content_type: mime.getType(entry) ?? undefined
-    });
+
+    if (this.#file.size !== link.contentByteLength) {
+      throw new Error(
+        `File size mismatch: expected ${String(this.#file.size)}, got ${String(link.contentByteLength)}`
+      );
+    }
+
+    if (!this.#file.originalInfo) {
+      manifest?.push({
+        "@type": "file",
+        name: this.#file.name,
+        cid: link.cid.toString(),
+        hash: hasher.digest("hex"),
+        byte_length: link.contentByteLength,
+        media_type: this.#file.media_type,
+      });
+    } else {
+      // This is part of a split file
+      manifest?.push({
+        "@type": "file-part",
+        name: this.#file.name,
+        cid: link.cid.toString(),
+        byte_length: link.contentByteLength,
+        original_file_name: this.#file.originalInfo.name,
+        original_file_hash: this.#file.originalInfo.hash,
+        original_file_byte_length: this.#file.originalInfo.size,
+      });
+    }
+
     return link;
   }
 }
@@ -74,7 +105,10 @@ class UnixFSDirectoryBuilder {
     this.#name = name;
   }
 
-  async _finalize(writer: View, manifest: ManifestContentEntry[]) {
+  async _finalize(
+    writer: View,
+    manifest: SubManifestContentEntry[] | undefined
+  ) {
     const dirWriter =
       this.entries.size <= SHARD_THRESHOLD ?
         UnixFS.createDirectoryWriter(writer)
@@ -86,16 +120,18 @@ class UnixFSDirectoryBuilder {
     return dirWriter;
   }
 
-  async finalize(writer: View, manifest: ManifestContentEntry[]) {
-    const contents: ManifestContentEntry[] = [];
+  async finalize(
+    writer: View,
+    manifest: SubManifestContentEntry[] | undefined
+  ) {
+    const contents: SubManifestContentEntry[] = [];
 
     const dirWriter = await this._finalize(writer, contents);
     // Note: added await here, check on performance implications
     const link = await dirWriter.close();
-    manifest.push({
-      type: "directory",
+    manifest?.push({
+      "@type": "directory",
       name: this.#name,
-      cid: link.cid.toString(),
       contents: contents,
     });
     return link;
@@ -107,6 +143,7 @@ class UnixFSDirectoryBuilder {
       metadata: UserMetadata;
       uuid: string;
       spec: string;
+      lite: boolean;
       specVersion: string;
     }
   ): Promise<SubManifest> {
@@ -115,7 +152,7 @@ class UnixFSDirectoryBuilder {
       "@spec_version": opts.specVersion,
       ...opts.metadata,
       uuid: opts.uuid,
-      contents: [],
+      contents: opts.lite ? undefined : [],
     };
 
     // finalize all the contents of the directory, capturing the manifest entries
@@ -147,6 +184,7 @@ export function createDirectoryEncoderStream(
     uuid: string;
     spec: string;
     specVersion: string;
+    lite: boolean;
   }
 ): { stream: ReadableStream<Block>; close: Promise<SubManifest> } {
   const rootDir = new UnixFSDirectoryBuilder(".");

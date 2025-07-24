@@ -16,8 +16,15 @@ import { Block } from "@ipld/unixfs";
 import { CAREncoderStream } from "ipfs-car";
 import { CID } from "multiformats/cid";
 
+import { mergeDeep } from "../contents.js";
 import { iterateFilesFromPathsWithSize } from "../files.js";
-import type { SuperManifest, UserMetadata } from "../manifest.d.js";
+import type {
+  SubManifest,
+  SuperManifest,
+  SuperManifestContentEntry,
+  UserMetadata,
+} from "../manifest.d.js";
+import parseBytes from "../parseBytes.js";
 import { createDirectoryEncoderStream } from "../unixfs.js";
 
 // Root CID written in CAR file header before it is updated with the real root CID.
@@ -25,17 +32,22 @@ const placeholderCID = CID.parse(
   "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"
 );
 
+const currentSpecURL =
+  "https://raw.githubusercontent.com/fidlabs/data-prep-standard/refs/heads/main/specification/v0/FilecoinDataPreparationManifestSpecification.md";
+
 export default async function pack(
   filePaths: string[],
   opts: {
     hidden?: boolean;
-    wrap?: boolean;
+    lite?: boolean;
     output: string;
     metadata: string;
     specVersion: string;
+    targetCarSize: string;
   }
 ) {
-  console.log("pack", filePaths, opts);
+  const targetCarSize = parseBytes(opts.targetCarSize);
+  console.log("pack", filePaths, opts, targetCarSize);
 
   if (opts.specVersion !== "0.1.0") {
     throw new Error(
@@ -55,8 +67,13 @@ export default async function pack(
   const uuid = crypto.randomUUID();
 
   // Create one or more streams of files to pack
+  const subManifests: { rootCID: CID; subManifest: SubManifest }[] = [];
   let nPiece = 0;
-  for await (const files of iterateFilesFromPathsWithSize(filePaths)) {
+
+  for await (const files of iterateFilesFromPathsWithSize(
+    filePaths,
+    targetCarSize
+  )) {
     let rootCID = placeholderCID;
 
     console.log(
@@ -68,7 +85,8 @@ export default async function pack(
       metadata,
       uuid,
       specVersion: opts.specVersion,
-      spec: "https://raw.githubusercontent.com/fidlabs/data-prep-standard/refs/heads/main/specification/v0/FilecoinDataPreparationManifestSpecification.md",
+      lite: opts.lite ?? false,
+      spec: currentSpecURL,
     });
 
     await stream
@@ -107,28 +125,38 @@ export default async function pack(
     await CarWriter.updateRootsInFile(fd, [rootCID]);
     await fd.close();
 
-    const { contents, ...rest } = subManifest;
-
-    const superManifest: SuperManifest = {
-      ...rest,
-      n_pieces: 1,
-      pieces: [
-        {
-          piece_cid: "TODO: calculate commP",
-          payload_cid: rootCID.toString(),
-          contents: contents,
-        },
-      ],
-    };
-
-    writeFile(
-      join(opts.output, "manifest.json"),
-      JSON.stringify(superManifest, null, 2),
-      (error) => {
-        if (error) throw error;
-      }
-    );
-
+    subManifests.push({ rootCID, subManifest });
     nPiece++;
   }
+
+  const superManifest: SuperManifest = {
+    "@spec": currentSpecURL,
+    "@spec_version": opts.specVersion,
+    ...metadata,
+    uuid,
+    n_pieces: subManifests.length,
+    pieces: subManifests.map(({ rootCID }) => {
+      return {
+        piece_cid: "TODO: calculate commP",
+        payload_cid: rootCID.toString(),
+      };
+    }),
+  };
+
+  if (!opts.lite) {
+    const contents: SuperManifestContentEntry[] = [];
+    // TODO: should be pieceCID
+    subManifests.forEach(({ rootCID, subManifest }) => {
+      mergeDeep(contents, rootCID, ...(subManifest.contents ?? []));
+    });
+    superManifest.contents = contents;
+  }
+
+  writeFile(
+    join(opts.output, "manifest.json"),
+    JSON.stringify(superManifest, null, 2),
+    (error) => {
+      if (error) throw error;
+    }
+  );
 }

@@ -1,20 +1,19 @@
-import assert from "node:assert";
-
+import { describe, expect, test } from "@jest/globals";
 import { execaSync } from "execa";
 
 const binPath = "./dist/bin.js";
 
 describe("CLI", function () {
-  it("fails when no command", () => {
-    assert.throws(() => execaSync(binPath));
+  test("fails when no command", () => {
+    expect(() => execaSync(binPath)).toThrow();
   });
 
-  it("ls succeeds", () => {
-    assert.doesNotThrow(() => execaSync(binPath, ["ls", "path/to/car"]));
+  test("ls succeeds", () => {
+    expect(() => execaSync(binPath, ["ls", "path/to/car"])).not.toThrow();
   });
 
-  it("pack succeeds", () => {
-    assert.doesNotThrow(() =>
+  test("pack succeeds", () => {
+    expect(() =>
       execaSync(binPath, [
         "pack",
         "-m",
@@ -23,23 +22,23 @@ describe("CLI", function () {
         "testing/outputs/pack",
         "testing/inputs/files/basic",
       ])
-    );
+    ).not.toThrow();
   });
 
-  it("unpack succeeds", () => {
-    assert.doesNotThrow(() =>
+  test("unpack succeeds", () => {
+    expect(() =>
       execaSync(binPath, [
         "unpack",
         "-o",
         "testing/outputs/unpack",
         "testing/inputs/packs/basic",
       ])
-    );
+    ).not.toThrow();
   });
 
-  it("verify succeeds", () => {
-    assert.doesNotThrow(() =>
+  test("verify succeeds", () => {
+    expect(() =>
       execaSync(binPath, ["verify", "path/to/car1", "path/to/car2"])
-    );
+    ).not.toThrow();
   });
 });

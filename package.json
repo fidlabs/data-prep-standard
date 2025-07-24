@@ -24,10 +24,10 @@
     "data-preparation"
   ],
   "scripts": {
-    "build": "npx tsc && chmod a+x dist/bin.js",
+    "build": "rimraf dist && npx tsc && chmod a+x dist/bin.js",
     "test": "npm run test:unit",
     "test:unit": "NODE_OPTIONS=--experimental-vm-modules jest --detectOpenHandles --verbose --coverage --roots ./src  --testPathIgnorePatterns \".(e2etest).\"",
-    "test:system": "rimraf testing/outputs && NODE_OPTIONS=\"--experimental-vm-modules --enable-source-maps\" jest ./dist/bin.e2etest.js",
+    "test:system": "rimraf testing/outputs && NODE_OPTIONS=\"--experimental-vm-modules --enable-source-maps\" jest --verbose --roots ./dist --testPathIgnorePatterns \"\\.(test)\\.\"",
     "lint": "eslint ./src",
     "lint:fix": "eslint --fix ./src",
     "prettier": "prettier --check ./src ",

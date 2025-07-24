@@ -42,7 +42,6 @@ You must provide a JSON file with manifest metadata containing the following fie
   .requiredOption("-o, --output <dir>", "Output directory.")
   .option("-H, --hidden", 'Include paths that start with ".".', false)
   .option("-l, --lite", "Don't include contents in the manifests.", false)
-  .option("--wrap", "Wrap input files with a directory.", true)
   .option(
     "--spec-version",
     "version of the metadata specification to use.",

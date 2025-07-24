@@ -112,6 +112,7 @@ A sub-manifest shall be provided inside each CAR (piece) which describes the con
 | cid          | String    | required, utf-8, [CID v1](https://docs.ipfs.tech/concepts/content-addressing/#version-1-v1)  | Content Identifier for the file / directory. |
 | original_file_name  | String   | required, utf-8, max-len 256  | file name of the original file on disk.  |
 | original_file_hash  | String   | required, utf-8, SHA256 hash  | Cryptographic hash of the original file on disk, used as a "back link" to identify the original file in the super-manifest.  |
+| original_file_byte_length | required, whole number  | size of the original file in bytes.  |
 
 
 ## Common
@@ -156,7 +157,7 @@ A sub-manifest shall be provided inside each CAR (piece) which describes the con
             "name": "dogs",
             "contents": [
                 {
-                    "type": "@file",
+                    "@type": "file",
                     "name": "rover.jpeg",
                     "hash": "bdc1d51b183d5ad329fadba55bba6d0988d6180ddd9d606df54dd56a6f43ef42"
                     "cid": "bafkreiflb6kpfyupgm42tfq55ag3sr3qv3nqiw625jdriyx6wr5ewynppe",
@@ -165,7 +166,7 @@ A sub-manifest shall be provided inside each CAR (piece) which describes the con
                     "piece_cid": "bafkreiaw7ga7qnz2jazjh5i7ymarpojwlptatlps4rj7w4yqvey3yucb74"
                 },
                 {
-                    "type": "@split-file",
+                    "@type": "split-file",
                     "name": "crufts.mpeg",
                     "hash": "f606d62ef8e97eb527556da69de37f02026167933a617b07be33a570fbdd61a4"
                     "cid": "bafkreiflb6kpfyupgm42tfq55ag3sr3qv3nqiw625jdriyx6wr5ewynppe",
@@ -233,6 +234,7 @@ Sub manifest in CAR in Piece 1
                     "@type": "file",
                     "name": "rover.jpeg",
                     "cid": "bafkreiflb6kpfyupgm42tfq55ag3sr3qv3nqiw625jdriyx6wr5ewynppe",
+                    "hash" : "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
                     "byte_length": 17376,
                     "media_type": "image/jpeg",
                 },
@@ -243,6 +245,7 @@ Sub manifest in CAR in Piece 1
                     "cid": "bafkreibgjlm6mrxx4ffghw2z3ozjmxpu7kcvlip5suvmkj7ekpdefeyoky",
                     "original_file_name" : "crufts.mpeg",
                     "original_file_hash" : "f606d62ef8e97eb527556da69de37f02026167933a617b07be33a570fbdd61a4"
+                    "original_file_byte_length": 173760000
                 },
             ]
         }
@@ -277,6 +280,7 @@ Sub manifest in CAR in Piece 2
                     "cid": "bafkreiefzwqep242uwiplt46jaktsj2u43zdeyt55igf57xp3hvewztrwa",
                     "original_file_name" : "crufts.mpeg",
                     "original_file_hash" : "f606d62ef8e97eb527556da69de37f02026167933a617b07be33a570fbdd61a4"
+                    "original_file_byte_length": 173760000
                 },
             ]
         },

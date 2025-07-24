@@ -303,4 +303,38 @@ describe("super manifest", () => {
       ])
     );
   });
+
+  test("merge piece with bad entry", () => {
+    const manifest = new Manifest(
+      {
+        name: "Test Manifest",
+        description: "This is a test manifest",
+        version: "1.0.0",
+        license: "MIT",
+        project_url: "https://example.com",
+        open_with: "test-app",
+        tags: ["test", "manifest"],
+      },
+      "0.1.0"
+    );
+
+    const subManifest = manifest.newSubManifest();
+    subManifest.contents = [
+      {
+        "@type": "not a type" as "file", // Intentionally incorrect type
+        name: "test.txt",
+        cid: "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+        hash: "1234567890abcdef",
+        byte_length: 1234,
+      },
+    ];
+
+    expect(() => {
+      manifest.addPiece(
+        subManifest,
+        CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u"),
+        CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
+      )
+    }).toThrow();
+  });
 });

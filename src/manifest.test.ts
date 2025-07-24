@@ -125,4 +125,88 @@ describe("super manifest", () => {
       })
     );
   });
+
+  test("merge pieces with different parts of the same file", () => {
+    const manifest = new Manifest(
+      {
+        name: "Test Manifest",
+        description: "This is a test manifest",
+        version: "1.0.0",
+        license: "MIT",
+        project_url: "https://example.com",
+        open_with: "test-app",
+        tags: ["test", "manifest"],
+      },
+      "0.1.0"
+    );
+
+    const subManifest1 = manifest.newSubManifest();
+    subManifest1.contents = [
+      {
+        "@type": "file-part",
+        name: "file1.txt.part0",
+        cid: "bafybeieplyjzhimptinwi5ufo3hlhum7svpq5r3g5f7jhynolvtvn3w77i",
+        byte_length: 1234,
+        original_file_name: "file1.txt",
+        original_file_hash: "abcdef1234567890",
+        original_file_byte_length: 5678,
+      },
+    ];
+
+    const subManifest2 = manifest.newSubManifest();
+    subManifest2.contents = [
+      {
+        "@type": "file-part",
+        name: "file1.txt.part1",
+        cid: "bafybeieplyjzhimptinwi5ufo3hlhum7svpq5r3g5f7jhynolvtvn3w77i",
+        byte_length: 4444,
+        original_file_name: "file1.txt",
+        original_file_hash: "abcdef1234567890",
+        original_file_byte_length: 5678,
+      },
+    ];
+
+    manifest.addPiece(
+      subManifest1,
+      CID.parse("bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"),
+      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
+    );
+
+    manifest.addPiece(
+      subManifest2,
+      CID.parse("bafybeid6xkp2vhffdjyainoa7fqmkm2aduq55xnnn2nnx7mioh2xyglj5m"),
+      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
+    );
+
+    expect(manifest.n_pieces).toBe(2);
+    expect(manifest.pieces).toHaveLength(2);
+
+    expect(manifest.contents).toHaveLength(1);
+    expect(manifest.contents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          "@type": "split-file",
+          name: "file1.txt",
+          hash: "abcdef1234567890",
+          byte_length: 5678,
+          parts: [
+            expect.objectContaining({
+              name: "file1.txt.part0",
+              cid: "bafybeieplyjzhimptinwi5ufo3hlhum7svpq5r3g5f7jhynolvtvn3w77i",
+              byte_length: 1234,
+              piece_cid:
+                "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+            }),
+            expect.objectContaining({
+              name: "file1.txt.part1",
+              cid: "bafybeieplyjzhimptinwi5ufo3hlhum7svpq5r3g5f7jhynolvtvn3w77i",
+              byte_length: 4444,
+              piece_cid:
+                "bafybeid6xkp2vhffdjyainoa7fqmkm2aduq55xnnn2nnx7mioh2xyglj5m",
+            }),
+          ],
+        }),
+      ])
+    );
+  });
 });

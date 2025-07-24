@@ -32,9 +32,6 @@ const splitFileIfOverPercentage = 50;
  * where each batch does not exceed a specified size limit (default is 31 GiB).
  * Each yielded batch is an array of SplitFileLike objects.
  *
- * Note: This implementation does not yet split files, it will yield full files
- * only and throw an exception if a file is too big.
- *
  * @param {string[]} filePaths - Array of file paths to process.
  * @param {number} nBytes - Maximum size in bytes for each batch (default: 31 GiB).
  * @returns {AsyncGenerator<SplitFileLike[]>} - An async generator yielding batches of files.

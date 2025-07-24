@@ -22,6 +22,9 @@ export interface SplitFileLike extends FileLike {
 
 // We split files between CARs if the files are larger than this % of the desired
 // car size.
+// Efficient downloading of the whole original is important, and splitting large
+// files into lots of parts and spreading it across lots of pieces will become problematic,
+// so we set this quite high.
 const splitFileIfOverPercentage = 50;
 
 /* iterateFilesFromPathsWithSize

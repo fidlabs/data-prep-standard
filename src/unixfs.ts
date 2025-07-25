@@ -9,11 +9,7 @@ import { withWidth } from "@ipld/unixfs/file/layout/balanced";
 import * as raw from "multiformats/codecs/raw";
 
 import type { SplitFileLike } from "./files.js";
-import type {
-  SubManifest,
-  SubManifestContentEntry,
-  UserMetadata,
-} from "./manifest.d.js";
+import type { SubManifest, SubManifestContentEntry } from "./manifest.js";
 
 const SHARD_THRESHOLD = 1000; // shard directory after > 1,000 items
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -137,24 +133,7 @@ class UnixFSDirectoryBuilder {
     return link;
   }
 
-  async manifest(
-    writer: View,
-    opts: {
-      metadata: UserMetadata;
-      uuid: string;
-      spec: string;
-      lite: boolean;
-      specVersion: string;
-    }
-  ): Promise<SubManifest> {
-    const subManifest: SubManifest = {
-      "@spec": opts.spec,
-      "@spec_version": opts.specVersion,
-      ...opts.metadata,
-      uuid: opts.uuid,
-      contents: opts.lite ? undefined : [],
-    };
-
+  async manifest(writer: View, subManifest: SubManifest): Promise<void> {
     // finalize all the contents of the directory, capturing the manifest entries
     const dirWriter = await this._finalize(writer, subManifest.contents);
 
@@ -172,21 +151,13 @@ class UnixFSDirectoryBuilder {
     const man = await unixfsFileWriter.close();
     dirWriter.set("manifest.json", man);
     await dirWriter.close();
-
-    return subManifest;
   }
 }
 
 export function createDirectoryEncoderStream(
   files: Iterable<SplitFileLike>,
-  opts: {
-    metadata: UserMetadata;
-    uuid: string;
-    spec: string;
-    specVersion: string;
-    lite: boolean;
-  }
-): { stream: ReadableStream<Block>; close: Promise<SubManifest> } {
+  subManifest: SubManifest
+): { stream: ReadableStream<Block>; subManifestPromise: Promise<void> } {
   const rootDir = new UnixFSDirectoryBuilder(".");
 
   for (const file of files) {
@@ -221,12 +192,11 @@ export function createDirectoryEncoderStream(
     writable,
     settings: defaultSettings,
   });
-  const close = async (): Promise<SubManifest> => {
+  const close = async (): Promise<void> => {
     // console.log("closing")
-    const manifest = await rootDir.manifest(unixfsWriter, opts);
+    await rootDir.manifest(unixfsWriter, subManifest);
     await unixfsWriter.close();
-    return manifest;
   };
 
-  return { stream: readable, close: close() };
+  return { stream: readable, subManifestPromise: close() };
 }

@@ -96,6 +96,7 @@ export const iterateFilesFromPathsWithSize = async function* (
       }
     });
     await pipeline(file.stream(), hasher);
+    console.log("hashing done");
 
     while (fileSizeRemaining > 0) {
       const size = Math.min(nBytes - bytes, fileSizeRemaining);

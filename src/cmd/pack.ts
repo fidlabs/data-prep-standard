@@ -16,6 +16,7 @@ import { CarWriter } from "@ipld/car/writer";
 import { Block } from "@ipld/unixfs";
 import { CAREncoderStream } from "ipfs-car";
 import { CID } from "multiformats/cid";
+import { createCommPStream } from '@filoz/synapse-sdk/commp'
 
 import { iterateFilesFromPathsWithSize } from "../files.js";
 import { Manifest, type UserMetadata } from "../manifest.js";
@@ -74,30 +75,50 @@ export default async function pack(
       subManifest
     );
 
-    await stream
+    const carStream = await stream
       .pipeThrough(
         new TransformStream<Block, Block>({
           transform(block, controller) {
             // we visit every block, the last one will be the root block
             rootCID = CID.parse(block.cid.toString());
 
-            // TODO: work out the proper piece CID (CommP)
-            pieceCID = rootCID;
             // console.log("Root CID:", rootCID.toString());
             controller.enqueue(block);
           },
         })
       )
-      .pipeThrough(new CAREncoderStream([placeholderCID]))
-      .pipeTo(
+      .pipeThrough(new CAREncoderStream([placeholderCID]));
+
+    // Annoyingly we now have to stream the whole lot again as Piece Commitment
+    // requires FR32 padding the finished CAR file, so fork it and process in parallel.
+    const [toFile, toCommP] = carStream.tee();
+    const { stream: commPTransform, getCommP } = createCommPStream();
+    await Promise.all([
+      // One stream goes to disk...
+      toFile.pipeTo(
         Writable.toWeb(
           createWriteStream(join(opts.output, pieceTemporaryFilename), {
             autoClose: true,
           })
         )
-      );
+      ),
 
-    // console.log("Packing completed, root CID:", rootCID.toString());
+      // ...the other stream goes to the commP transform.
+      toCommP
+        .pipeThrough(commPTransform)
+        .pipeTo(new WritableStream({
+          write() { /* noop, just ensure we're drained before fetching commP */ }
+        }))
+    ]);
+
+    // Bit tortured to get the CID as FilOz use a 'legacy' type in preparation for Piece V2.
+    const streamCommP = getCommP()
+    if (!streamCommP) {
+      throw new Error("Failed to get CommP from stream");
+    }
+    pieceCID = CID.parse(streamCommP.toString())
+
+    console.log(`Packing completed, root CID: ${rootCID.toString()}, piece CID: ${pieceCID.toString()}`);
 
     await subManifestPromise;
 

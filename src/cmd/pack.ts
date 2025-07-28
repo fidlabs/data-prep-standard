@@ -12,11 +12,11 @@ import { open } from "node:fs/promises";
 import { join } from "node:path";
 import { Writable } from "node:stream";
 
+import { createCommPStream } from '@filoz/synapse-sdk/commp'
 import { CarWriter } from "@ipld/car/writer";
 import { Block } from "@ipld/unixfs";
 import { CAREncoderStream } from "ipfs-car";
 import { CID } from "multiformats/cid";
-import { createCommPStream } from '@filoz/synapse-sdk/commp'
 
 import { iterateFilesFromPathsWithSize } from "../files.js";
 import { Manifest, type UserMetadata } from "../manifest.js";
@@ -75,7 +75,7 @@ export default async function pack(
       subManifest
     );
 
-    const carStream = await stream
+    const carStream = stream
       .pipeThrough(
         new TransformStream<Block, Block>({
           transform(block, controller) {

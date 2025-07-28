@@ -12,7 +12,7 @@ import { open } from "node:fs/promises";
 import { join } from "node:path";
 import { Writable } from "node:stream";
 
-import { createCommPStream } from '@filoz/synapse-sdk/commp'
+import { createCommPStream } from "@filoz/synapse-sdk/commp";
 import { CarWriter } from "@ipld/car/writer";
 import { Block } from "@ipld/unixfs";
 import { CAREncoderStream } from "ipfs-car";
@@ -104,21 +104,25 @@ export default async function pack(
       ),
 
       // ...the other stream goes to the commP transform.
-      toCommP
-        .pipeThrough(commPTransform)
-        .pipeTo(new WritableStream({
-          write() { /* noop, just ensure we're drained before fetching commP */ }
-        }))
+      toCommP.pipeThrough(commPTransform).pipeTo(
+        new WritableStream({
+          write() {
+            /* noop, just ensure we're drained before fetching commP */
+          },
+        })
+      ),
     ]);
 
     // Bit tortured to get the CID as FilOz use a 'legacy' type in preparation for Piece V2.
-    const streamCommP = getCommP()
+    const streamCommP = getCommP();
     if (!streamCommP) {
       throw new Error("Failed to get CommP from stream");
     }
-    pieceCID = CID.parse(streamCommP.toString())
+    pieceCID = CID.parse(streamCommP.toString());
 
-    console.log(`Packing completed, root CID: ${rootCID.toString()}, piece CID: ${pieceCID.toString()}`);
+    console.log(
+      `Packing completed, root CID: ${rootCID.toString()}, piece CID: ${pieceCID.toString()}`
+    );
 
     await subManifestPromise;
 

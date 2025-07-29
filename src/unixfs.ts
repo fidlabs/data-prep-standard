@@ -143,14 +143,12 @@ class UnixFSDirectoryBuilder {
 
     console.log("writing sub manifest to UnixFS");
     await JSONReadableStreamFromObject(subManifest).pipeTo(
-      new WritableStream(
-        {
-          async write(chunk: Uint8Array) {
-            await unixfsFileWriter.write(chunk);
-          },
+      new WritableStream({
+        async write(chunk: Uint8Array) {
+          // console.log("writing chunk", chunk.length)
+          await unixfsFileWriter.write(chunk);
         },
-        new ByteLengthQueuingStrategy({ highWaterMark: 256 * 1024 })
-      )
+      })
     );
     console.log("sub manifest written");
     const man = await unixfsFileWriter.close();

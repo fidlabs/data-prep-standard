@@ -21,52 +21,68 @@ export function JSONReadableStreamFromObject(
   options: { chunkSize?: number } = {}
 ): ReadableStream {
   const generator = enqueueObject(obj, { indent: 2 }, 0);
+  let overspill = "";
 
-  return new ReadableStream(
-    {
-      pull(controller: ReadableStreamDefaultController<Uint8Array>) {
-        let more = true;
-        const chunkSize = options.chunkSize ?? defaultChunkSize;
-        let buffer = Buffer.alloc(chunkSize);
-        let offset = 0;
+  return new ReadableStream({
+    // pull(controller: ReadableStreamDefaultController<Uint8Array>) {
+    //   let more = true;
 
-        while (more && controller.desiredSize && controller.desiredSize > 0) {
-          const { value } = generator.next();
+    //   // while (more && controller.desiredSize && controller.desiredSize > 0) {
+    //     const { value } = generator.next();
 
-          if (value) {
-            if (value.length > chunkSize) {
-              // It would be possible to split the value into chunks, but it is very unlikely that
-              // will ever be needed (that would only be for very small chunks)
-              throw new Error(
-                `JSONReadableStreamFromObject: value length ${String(value.length)} exceeds chunk size ${String(chunkSize)}`
-              );
-            }
+    //     if (value) {
+    //       controller.enqueue(Buffer.from(value));
+    //     } else {
+    //       controller.close();
+    //       // more = false;
+    //     }
+    //   // }
+    // },
 
-            const written = buffer.write(value, offset);
-            if (written < value.length) {
-              controller.enqueue(buffer);
-              buffer = Buffer.alloc(chunkSize);
-              buffer.write(value.slice(written), 0);
-              offset = value.length - written;
-            } else {
-              offset += value.length;
-            }
-          } else {
-            if (offset > 0) {
-              controller.enqueue(buffer.subarray(0, offset));
-            }
-            offset = 0;
-            controller.close();
+    pull(controller: ReadableStreamDefaultController<Uint8Array>) {
+      let more = true;
+      const chunkSize = options.chunkSize ?? defaultChunkSize;
+      const buffer = Buffer.alloc(chunkSize);
+      let offset = 0;
+
+      if (overspill.length > 0) {
+        buffer.write(overspill);
+        offset = overspill.length;
+        overspill = "";
+      }
+
+      while (more && controller.desiredSize && controller.desiredSize > 0) {
+        const { value, done } = generator.next();
+
+        if (value) {
+          if (value.length > chunkSize) {
+            // It would be possible to split the value into chunks, but it is very unlikely that
+            // will ever be needed (that would only be for very small chunks)
+            throw new Error(
+              `JSONReadableStreamFromObject: value length ${String(value.length)} exceeds chunk size ${String(chunkSize)}`
+            );
+          }
+
+          const written = buffer.write(value, offset);
+          if (written < value.length) {
+            controller.enqueue(buffer);
+            overspill = value.slice(written);
             more = false;
+          } else {
+            offset += value.length;
           }
         }
-        if (offset > 0) {
-          controller.enqueue(buffer.subarray(0, offset));
+
+        if (!value || done) {
+          if (offset > 0) {
+            controller.enqueue(buffer.subarray(0, offset));
+          }
+          controller.close();
+          more = false;
         }
-      },
+      }
     },
-    new ByteLengthQueuingStrategy({ highWaterMark: 256 * 1024 })
-  );
+  });
 }
 
 function getIndent(indent: number, level: number): string {

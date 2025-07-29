@@ -98,9 +98,11 @@ export default async function pack(
         Writable.toWeb(
           createWriteStream(join(opts.output, pieceTemporaryFilename), {
             autoClose: true,
-            highWaterMark: 256 * 1024,
+            // Without this the entire sub-manifest gets cached in memory before being
+            // written to disk
+            highWaterMark: 1,
           })
-        )
+        ) as WritableStream<Buffer>
       ),
 
       // ...the other stream goes to the commP transform.
@@ -144,8 +146,10 @@ export default async function pack(
     Writable.toWeb(
       createWriteStream(join(opts.output, "manifest.json"), {
         autoClose: true,
-        highWaterMark: 256 * 1024,
+        // Without this the entire manifest gets cached in memory before being
+        // written to disk
+        highWaterMark: 1,
       })
-    )
+    ) as WritableStream<Buffer>
   );
 }

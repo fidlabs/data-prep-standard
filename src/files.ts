@@ -78,6 +78,7 @@ export const iterateFilesFromPathsWithSize = async function* (
     }
 
     // File is big and needs splitting over multiple batches
+    console.log("hashing large file for splitting:", file.name, file.size);
 
     let fileSizeRemaining = file.size;
     let offset = 0;
@@ -96,6 +97,7 @@ export const iterateFilesFromPathsWithSize = async function* (
       }
     });
     await pipeline(file.stream(), hasher);
+    console.log("hashing done");
 
     while (fileSizeRemaining > 0) {
       const size = Math.min(nBytes - bytes, fileSizeRemaining);

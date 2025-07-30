@@ -1,4 +1,5 @@
-import { existsSync } from "node:fs";
+// eslint-disable-next-line n/no-unsupported-features/node-builtins
+import { existsSync, statfsSync } from "node:fs";
 import { mkdir, open } from "node:fs/promises";
 import { join, sep } from "node:path";
 
@@ -6,6 +7,17 @@ import { describe, expect, test } from "@jest/globals";
 import { execaSync } from "execa";
 
 const binPath = "./dist/bin.js";
+
+const fsStats = statfsSync("/");
+
+const beSmall = fsStats.bsize * fsStats.bavail < 300 * 1024 * 1024 * 1024; // less than 300GB disk space available.
+
+if (beSmall) {
+  // github actions standard runner VMs only have 14GB of disk space.
+  console.warn(
+    `Running in a small disk space environment (${String(fsStats.bsize * fsStats.bavail)}), tests will be limited to 1000 files / 250MB.`
+  );
+}
 
 function makeName(length: number): string {
   let result = "";
@@ -70,64 +82,73 @@ const mkFileTree = async (
 };
 
 describe("pack", function () {
-  beforeAll(async () => {
-    const filesPath = join("testing", "generated", "pack.e2e.ManyFiles");
-    if (!existsSync(filesPath)) {
-      await mkFileTree(filesPath, {
-        // we would like to test with a million files, but there is
-        // not enough disk space on the CI to do that, so we use 1000 instead
-        nFiles: 1 * 1000, // * 1000,
-        minSize: 1,
-        maxSize: 1 * 1024,
-        maxDepth: 30,
-        maxName: 80,
-      });
-    }
-  });
+  beforeAll(
+    async () => {
+      const filesPath = join("testing", "generated", "pack.e2e.ManyFiles");
+      if (!existsSync(filesPath)) {
+        await mkFileTree(filesPath, {
+          nFiles: 1 * 1000 * (beSmall ? 1 : 1000),
+          minSize: 1,
+          maxSize: 1 * 1024,
+          maxDepth: 30,
+          maxName: 80,
+        });
+      }
+    },
+    beSmall ? undefined : 1000 * 60 * 10
+  ); // 10 minutes for large file system
 
-  beforeAll(async () => {
-    const filesPath = join("testing", "generated", "pack.e2e.HugeFile");
-    if (!existsSync(filesPath)) {
-      await mkFileTree(filesPath, {
-        nFiles: 1,
-        // we would like to test a file that is larger than 32GB, but there is
-        // not enough disk space on the CI to do that, so we use 36MB instead
-        minSize: 36 * 1024 * 1024, // * 1024,
-        maxSize: 36 * 1024 * 1024, // * 1024,
-        maxDepth: 1,
-        maxName: 20,
-      });
-    }
-  });
+  beforeAll(
+    async () => {
+      const filesPath = join("testing", "generated", "pack.e2e.HugeFile");
+      if (!existsSync(filesPath)) {
+        await mkFileTree(filesPath, {
+          nFiles: 1,
+          minSize: 250 * 1024 * 1024 * (beSmall ? 1 : 1024),
+          maxSize: 250 * 1024 * 1024 * (beSmall ? 1 : 1024),
+          maxDepth: 1,
+          maxName: 20,
+        });
+      }
+    },
+    beSmall ? undefined : 1000 * 60 * 10
+  ); // 10 minutes for large file system
 
-  test("pack many files", () => {
-    expect(() => {
-      const { stdout } = execaSync(binPath, [
-        "pack",
-        "-m",
-        "testing/inputs/metadata/basic.json",
-        "-l",
-        "-o",
-        "testing/outputs/pack.e2e.ManyFiles",
-        "testing/generated/pack.e2e.ManyFiles",
-      ]);
-      console.log("stdout:", stdout);
-    }).not.toThrow();
-  });
+  test(
+    "pack many files",
+    () => {
+      expect(() => {
+        const { stdout } = execaSync(binPath, [
+          "pack",
+          "-m",
+          "testing/inputs/metadata/basic.json",
+          "-o",
+          "testing/outputs/pack.e2e.ManyFiles",
+          "testing/generated/pack.e2e.ManyFiles",
+        ]);
+        console.log("stdout:", stdout);
+      }).not.toThrow();
+    },
+    beSmall ? undefined : 1000 * 60 * 10
+  ); // 10 minutes for large file system
 
-  test("pack one huge file", () => {
-    expect(() => {
-      const { stdout } = execaSync(binPath, [
-        "pack",
-        "-m",
-        "testing/inputs/metadata/basic.json",
-        "--target-car-size",
-        "31MiB",
-        "-o",
-        "testing/outputs/pack.e2e.HugeFile",
-        "testing/generated/pack.e2e.HugeFile",
-      ]);
-      console.log("stdout:", stdout);
-    }).not.toThrow();
-  });
+  test(
+    "pack one huge file",
+    () => {
+      expect(() => {
+        const { stdout } = execaSync(binPath, [
+          "pack",
+          "-m",
+          "testing/inputs/metadata/basic.json",
+          "--target-car-size",
+          beSmall ? "31MiB" : "31GiB",
+          "-o",
+          "testing/outputs/pack.e2e.HugeFile",
+          "testing/generated/pack.e2e.HugeFile",
+        ]);
+        console.log("stdout:", stdout);
+      }).not.toThrow();
+    },
+    beSmall ? undefined : 1000 * 60 * 10
+  ); // 10 minutes for large file system
 });

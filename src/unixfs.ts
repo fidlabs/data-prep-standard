@@ -1,6 +1,5 @@
 /* eslint-disable n/no-unsupported-features/node-builtins */
 import { createHash } from "node:crypto";
-import { Readable } from "node:stream";
 
 import type { Block, View } from "@ipld/unixfs";
 import * as UnixFS from "@ipld/unixfs";
@@ -9,6 +8,7 @@ import { withWidth } from "@ipld/unixfs/file/layout/balanced";
 import * as raw from "multiformats/codecs/raw";
 
 import type { SplitFileLike } from "./files.js";
+import { JSONReadableStreamFromObject } from "./jsonReadableStreamFromObject.js";
 import type { SubManifest, SubManifestContentEntry } from "./manifest.js";
 
 const SHARD_THRESHOLD = 1000; // shard directory after > 1,000 items
@@ -135,19 +135,22 @@ class UnixFSDirectoryBuilder {
 
   async manifest(writer: View, subManifest: SubManifest): Promise<void> {
     // finalize all the contents of the directory, capturing the manifest entries
+    console.log("creating UnixFS");
     const dirWriter = await this._finalize(writer, subManifest.contents);
 
     // write the manifest file to the directory
     const unixfsFileWriter = UnixFS.createFileWriter(writer);
-    const buf = Buffer.from(JSON.stringify(subManifest, null, 2));
 
-    await Readable.toWeb(Readable.from(buf)).pipeTo(
+    console.log("writing sub manifest to UnixFS");
+    await JSONReadableStreamFromObject(subManifest).pipeTo(
       new WritableStream({
         async write(chunk: Uint8Array) {
+          // console.log("writing chunk", chunk.length)
           await unixfsFileWriter.write(chunk);
         },
       })
     );
+    console.log("sub manifest written");
     const man = await unixfsFileWriter.close();
     dirWriter.set("manifest.json", man);
     await dirWriter.close();

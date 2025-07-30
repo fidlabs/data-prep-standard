@@ -46,6 +46,51 @@ describe("testing pack function", () => {
         targetCarSize: "31GiB",
       })
     ).resolves.not.toThrow();
+
+    const manifestContent = fs.readFileSync(
+      "outdir/manifest.json",
+      "utf-8"
+    ) as string;
+    console.log("manifestContent", manifestContent);
+    expect(JSON.parse(manifestContent)).toEqual(
+      expect.objectContaining({
+        "@spec":
+          "https://raw.githubusercontent.com/fidlabs/data-prep-standard/refs/heads/main/specification/v0/FilecoinDataPreparationManifestSpecification.md",
+        "@spec_version": "0.1.0",
+        uuid: expect.any(String),
+        name: "test",
+        description: "test desc",
+        version: "2025/04/16",
+        license: "MIT",
+        project_url: "https://test.org",
+        open_with: "browser",
+        n_pieces: 1,
+        pieces: expect.arrayContaining([
+          expect.objectContaining({
+            piece_cid: expect.any(String),
+            payload_cid: expect.any(String),
+          }),
+        ]),
+        contents: expect.arrayContaining([
+          expect.objectContaining({
+            "@type": "file",
+            name: "file1.txt",
+            byte_length: 11,
+            hash: expect.any(String),
+            cid: expect.any(String),
+            piece_cid: expect.any(String),
+          }),
+          expect.objectContaining({
+            "@type": "file",
+            name: "file2.txt",
+            byte_length: 12,
+            hash: expect.any(String),
+            cid: expect.any(String),
+            piece_cid: expect.any(String),
+          }),
+        ]),
+      })
+    );
   });
 
   test("bad spec version", async () => {

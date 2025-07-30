@@ -6,7 +6,6 @@ import {
   mkdirSync,
   readFileSync,
   renameSync,
-  writeFile,
 } from "node:fs";
 import { open } from "node:fs/promises";
 import { join } from "node:path";
@@ -19,6 +18,7 @@ import { CAREncoderStream } from "ipfs-car";
 import { CID } from "multiformats/cid";
 
 import { iterateFilesFromPathsWithSize } from "../files.js";
+import { JSONReadableStreamFromObject } from "../jsonReadableStreamFromObject.js";
 import { Manifest, type UserMetadata } from "../manifest.js";
 import parseBytes from "../parseBytes.js";
 import { createDirectoryEncoderStream } from "../unixfs.js";
@@ -40,7 +40,7 @@ export default async function pack(
   }
 ) {
   const targetCarSize = parseBytes(opts.targetCarSize);
-  console.log("pack", filePaths, opts, targetCarSize);
+  console.log("packing paths:", filePaths);
 
   // Check if output directory exists, if not create it
   if (!existsSync(opts.output)) {
@@ -52,6 +52,8 @@ export default async function pack(
     opts.specVersion,
     { lite: opts.lite ?? undefined }
   );
+
+  console.log("Scanning files for packing");
 
   for await (const files of iterateFilesFromPathsWithSize(
     filePaths,
@@ -65,10 +67,7 @@ export default async function pack(
     // after the root (payload) CID is known.
     const pieceTemporaryFilename = `piece-${crypto.randomUUID()}.car`;
 
-    console.log(
-      `New piece: files to pack: `,
-      files.map((f) => f.name)
-    );
+    console.log(`New piece. Files to pack:`, files.length);
 
     const { stream, subManifestPromise } = createDirectoryEncoderStream(
       files,
@@ -99,8 +98,11 @@ export default async function pack(
         Writable.toWeb(
           createWriteStream(join(opts.output, pieceTemporaryFilename), {
             autoClose: true,
+            // Without this the entire sub-manifest gets cached in memory before being
+            // written to disk
+            highWaterMark: 1,
           })
-        )
+        ) as WritableStream<Buffer>
       ),
 
       // ...the other stream goes to the commP transform.
@@ -139,11 +141,15 @@ export default async function pack(
     manifest.addPiece(subManifest, pieceCID, rootCID);
   }
 
-  writeFile(
-    join(opts.output, "manifest.json"),
-    JSON.stringify(manifest, null, 2),
-    (error) => {
-      if (error) throw error;
-    }
+  console.log("Packing completed, writing manifest");
+  await JSONReadableStreamFromObject(manifest).pipeTo(
+    Writable.toWeb(
+      createWriteStream(join(opts.output, "manifest.json"), {
+        autoClose: true,
+        // Without this the entire manifest gets cached in memory before being
+        // written to disk
+        highWaterMark: 1,
+      })
+    ) as WritableStream<Buffer>
   );
 }

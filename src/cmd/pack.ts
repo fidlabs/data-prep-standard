@@ -13,7 +13,6 @@ import { Writable } from "node:stream";
 
 import { createCommPStream } from "@filoz/synapse-sdk/commp";
 import { CarWriter } from "@ipld/car/writer";
-import { Block } from "@ipld/unixfs";
 import { CAREncoderStream } from "ipfs-car";
 import { CID } from "multiformats/cid";
 
@@ -72,7 +71,7 @@ export default async function pack(
     );
 
     const { stream: commPTransform, getCommP } = createCommPStream();
-    const carEncoder = new CAREncoderStream([placeholderCID])
+    const carEncoder = new CAREncoderStream([placeholderCID]);
 
     await stream
       .pipeThrough(carEncoder)
@@ -89,9 +88,9 @@ export default async function pack(
       );
 
     if (!carEncoder.finalBlock) {
-      throw new Error("Failed to get final block from CAR stream")
+      throw new Error("Failed to get final block from CAR stream");
     }
-    const rootCID = CID.parse(carEncoder.finalBlock.cid.toString())
+    const rootCID = CID.parse(carEncoder.finalBlock.cid.toString());
 
     // Bit tortured to get the CID as FilOz use a 'legacy' type in preparation for Piece V2.
     const streamCommP = getCommP();

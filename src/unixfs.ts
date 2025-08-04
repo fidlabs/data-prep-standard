@@ -1,5 +1,6 @@
 /* eslint-disable n/no-unsupported-features/node-builtins */
 import { createHash } from "node:crypto";
+import { basename } from "node:path";
 
 import type { Block, View } from "@ipld/unixfs";
 import * as UnixFS from "@ipld/unixfs";
@@ -70,7 +71,7 @@ class UnixFsFileBuilder {
     if (!this.#file.originalInfo) {
       manifest?.push({
         "@type": "file",
-        name: this.#file.name,
+        name: basename(this.#file.name),
         cid: link.cid.toString(),
         hash: hasher.digest("hex"),
         byte_length: link.contentByteLength,
@@ -80,10 +81,10 @@ class UnixFsFileBuilder {
       // This is part of a split file
       manifest?.push({
         "@type": "file-part",
-        name: this.#file.name,
+        name: basename(this.#file.name),
         cid: link.cid.toString(),
         byte_length: link.contentByteLength,
-        original_file_name: this.#file.originalInfo.name,
+        original_file_name: basename(this.#file.originalInfo.name),
         original_file_hash: this.#file.originalInfo.hash,
         original_file_byte_length: this.#file.originalInfo.size,
       });
@@ -127,7 +128,7 @@ class UnixFSDirectoryBuilder {
     const link = await dirWriter.close();
     manifest?.push({
       "@type": "directory",
-      name: this.#name,
+      name: basename(this.#name),
       contents: contents,
     });
     return link;

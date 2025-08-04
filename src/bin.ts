@@ -60,6 +60,7 @@ cli
     "Super-manifest for the dataset. If supplied will be used to verify the full dataset."
   )
   .option("--verify", "Verify block hash consistency.", true)
+  .option("--verbose", "Show file names while unpacking.", false)
   .requiredOption("-o, --output <dir>", "Output directory.")
   .action(createAction("./cmd/unpack.js"));
 

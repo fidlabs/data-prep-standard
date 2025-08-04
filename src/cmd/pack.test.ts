@@ -103,4 +103,16 @@ describe("testing pack function", () => {
       })
     ).rejects.toThrow();
   });
+
+  test("no lite with split files", async () => {
+    await expect(
+      pack(["test"], {
+        output: "outdir",
+        metadata: "basicUserMetadata.json",
+        specVersion: "0.1.0",
+        lite: true,
+        targetCarSize: "4B",
+      })
+    ).rejects.toThrow();
+  });
 });

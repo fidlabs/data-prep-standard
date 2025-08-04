@@ -31,7 +31,7 @@ describe("CLI", function () {
         "unpack",
         "-o",
         "testing/outputs/unpack",
-        "testing/inputs/packs/basic",
+        "testing/inputs/packs/basic/piece-bafybeihfmvwkwudm6jdqnknqrzc4h52pz2kru24alg6pchcqxwu2vfamqu.car",
       ])
     ).not.toThrow();
   });

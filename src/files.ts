@@ -39,7 +39,8 @@ const splitFileIfOverPercentage = 50;
 
 export const iterateFilesFromPathsWithSize = async function* (
   filePaths: string[],
-  nBytes = 31 * 1024 * 1024 * 1024
+  nBytes = 31 * 1024 * 1024 * 1024,
+  lite: boolean
 ): AsyncGenerator<SplitFileLike[], void, void> {
   const allFiles = await filesFromPaths(filePaths, {
     fs: { createReadStream, promises: { readdir, stat } },
@@ -78,6 +79,12 @@ export const iterateFilesFromPathsWithSize = async function* (
     }
 
     // File is big and needs splitting over multiple batches
+
+    // We don't support splitting when not storing the contents in the manifest
+    // as unpacking becomes ambiguous in that case
+    if (lite) {
+      throw new Error("Splitting files not supported with --lite");
+    }
     console.log("hashing large file for splitting:", file.name, file.size);
 
     let fileSizeRemaining = file.size;

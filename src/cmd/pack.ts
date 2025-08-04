@@ -1,11 +1,11 @@
 /* eslint-disable n/no-unsupported-features/node-builtins */
-import crypto from "node:crypto";
 import {
   createWriteStream,
   existsSync,
   mkdirSync,
   readFileSync,
   renameSync,
+  unlinkSync,
 } from "node:fs";
 import { open } from "node:fs/promises";
 import { join } from "node:path";
@@ -37,7 +37,7 @@ export default async function pack(
     specVersion: string;
     targetCarSize: string;
   }
-) {
+): Promise<void> {
   const targetCarSize = parseBytes(opts.targetCarSize);
   console.log("packing paths:", filePaths);
 
@@ -56,12 +56,11 @@ export default async function pack(
 
   for await (const files of iterateFilesFromPathsWithSize(
     filePaths,
-    targetCarSize
+    targetCarSize,
+    opts.lite ?? false
   )) {
     const subManifest = manifest.newSubManifest();
-    // We use a UUID for a temporary piece file name, we will renamr it later
-    // after the root (payload) CID is known.
-    const pieceTemporaryFilename = `piece-${crypto.randomUUID()}.car`;
+    const pieceTemporaryFilename = `piece.car.streaming`;
 
     console.log(`New piece. Files to pack:`, files.length);
 
@@ -73,49 +72,55 @@ export default async function pack(
     const { stream: commPTransform, getCommP } = createCommPStream();
     const carEncoder = new CAREncoderStream([placeholderCID]);
 
-    await stream
-      .pipeThrough(carEncoder)
-      .pipeThrough(commPTransform)
-      .pipeTo(
-        Writable.toWeb(
-          createWriteStream(join(opts.output, pieceTemporaryFilename), {
-            autoClose: true,
-            // Without this the entire sub-manifest gets cached in memory before being
-            // written to disk
-            highWaterMark: 1,
-          })
-        ) as WritableStream<Buffer>
+    try {
+      await stream
+        .pipeThrough(carEncoder)
+        .pipeThrough(commPTransform)
+        .pipeTo(
+          Writable.toWeb(
+            createWriteStream(join(opts.output, pieceTemporaryFilename), {
+              autoClose: true,
+              // Without this the entire sub-manifest gets cached in memory before being
+              // written to disk
+              highWaterMark: 1,
+            })
+          ) as WritableStream<Buffer>
+        );
+
+      if (!carEncoder.finalBlock) {
+        throw new Error("Failed to get final block from CAR stream");
+      }
+      const rootCID = CID.parse(carEncoder.finalBlock.cid.toString());
+
+      // Bit tortured to get the CID as FilOz use a 'legacy' type in preparation for Piece V2.
+      const streamCommP = getCommP();
+      if (!streamCommP) {
+        throw new Error("Failed to get CommP from stream");
+      }
+      const pieceCID = CID.parse(streamCommP.toString());
+
+      console.log(
+        `Packing completed, root CID: ${rootCID.toString()}, piece CID: ${pieceCID.toString()}`
       );
 
-    if (!carEncoder.finalBlock) {
-      throw new Error("Failed to get final block from CAR stream");
+      await subManifestPromise;
+      manifest.addPiece(subManifest, pieceCID, rootCID);
+
+      // update roots in CAR header
+      const fd = await open(join(opts.output, pieceTemporaryFilename), "r+");
+      await CarWriter.updateRootsInFile(fd, [rootCID]);
+      await fd.close();
+
+      renameSync(
+        join(opts.output, pieceTemporaryFilename),
+        join(opts.output, `piece-${rootCID.toString()}.car`)
+      );
+    } catch (err: unknown) {
+      if (existsSync(pieceTemporaryFilename)) {
+        unlinkSync(pieceTemporaryFilename);
+      }
+      throw err;
     }
-    const rootCID = CID.parse(carEncoder.finalBlock.cid.toString());
-
-    // Bit tortured to get the CID as FilOz use a 'legacy' type in preparation for Piece V2.
-    const streamCommP = getCommP();
-    if (!streamCommP) {
-      throw new Error("Failed to get CommP from stream");
-    }
-    const pieceCID = CID.parse(streamCommP.toString());
-
-    console.log(
-      `Packing completed, root CID: ${rootCID.toString()}, piece CID: ${pieceCID.toString()}`
-    );
-
-    await subManifestPromise;
-
-    // update roots in CAR header
-    const fd = await open(join(opts.output, pieceTemporaryFilename), "r+");
-    await CarWriter.updateRootsInFile(fd, [rootCID]);
-    await fd.close();
-
-    renameSync(
-      join(opts.output, pieceTemporaryFilename),
-      join(opts.output, `piece-${rootCID.toString()}.car`)
-    );
-
-    manifest.addPiece(subManifest, pieceCID, rootCID);
   }
 
   console.log("Packing completed, writing manifest");

@@ -2,9 +2,8 @@ import { describe, expect, test } from "@jest/globals";
 import { CID } from "multiformats";
 
 import { SubManifest, SuperManifest } from "./manifest.js";
-import { PieceVerifier, Verifier } from "./verify.js";
 
-const { PieceVerifier } = await import("./verify.js");
+const { PieceVerifier, Verifier } = await import("./verify.js");
 
 describe("piece verifier", () => {
   let manifest: SuperManifest;
@@ -212,7 +211,7 @@ describe("piece verifier", () => {
 describe("verifier", () => {
   let manifest: SuperManifest;
   let subManifest: SubManifest;
-  let pieceVerifier: PieceVerifier;
+  const pieceVerifier = new PieceVerifier("path/to/carFile.car");
 
   beforeAll(() => {
     manifest = {
@@ -275,7 +274,6 @@ describe("verifier", () => {
       ],
     };
 
-    pieceVerifier = new PieceVerifier("path/to/carFile.car");
     pieceVerifier.addDirectory("test-dir");
     pieceVerifier.addFile("test-dir/file1.txt", {
       hash: "1234567890abcdef",
@@ -324,15 +322,15 @@ describe("verifier", () => {
       ],
     };
 
-    pieceVerifier = new PieceVerifier("path/to/carFile.car");
-    pieceVerifier.addDirectory("test-dir");
-    pieceVerifier.addFile("test-dir/file1.txt", {
+    const badPieceVerifier = new PieceVerifier("path/to/carFile.car");
+    badPieceVerifier.addDirectory("test-dir");
+    badPieceVerifier.addFile("test-dir/file1.txt", {
       hash: "1234567890abcdef",
       cid: "bafybeieplyjzhimptinwi5ufo3hlhum7svpq5r3g5f7jhynolvtvn3w77i",
       byteLength: 1234,
     });
 
-    pieceVerifier.verify(
+    badPieceVerifier.verify(
       subManifest,
       CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
     );
@@ -340,25 +338,13 @@ describe("verifier", () => {
 
     expect(() => {
       verifier.addPiece(
-        pieceVerifier,
+        badPieceVerifier,
         CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
       );
     }).toThrow();
   });
 
   test("different piece CID", () => {
-    const pieceVerifier = new PieceVerifier("path/to/carFile.car");
-    pieceVerifier.addDirectory("test-dir");
-    pieceVerifier.addFile("test-dir/file1.txt", {
-      hash: "1234567890abcdef",
-      cid: "bafybeieplyjzhimptinwi5ufo3hlhum7svpq5r3g5f7jhynolvtvn3w77i",
-      byteLength: 1234,
-    });
-
-    pieceVerifier.verify(
-      subManifest,
-      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
-    );
     const verifier = new Verifier(manifest);
 
     expect(() => {

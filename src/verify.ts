@@ -1,5 +1,7 @@
 import { join } from "node:path";
 
+import { CID } from "multiformats";
+
 import {
   SubManifest,
   SubManifestContentEntry,
@@ -30,11 +32,6 @@ export interface VerificationFilePart {
 }
 
 export type VerificationDirectory = null;
-
-export type VerificationContentEntry =
-  | VerificationFile
-  | VerificationSplitFile
-  | VerificationDirectory;
 
 function manifestKeyCheck(
   sup: SuperManifest,
@@ -79,7 +76,7 @@ export class PieceVerifier {
     this.#dirs.set(path, null);
   }
 
-  verify(subManifest: SubManifest, rootCID: string): VerificationFilePart[] {
+  verify(subManifest: SubManifest, rootCID: CID): VerificationFilePart[] {
     const fileParts: VerificationFilePart[] = [];
     this.#subManifest = subManifest;
 
@@ -114,6 +111,12 @@ export class PieceVerifier {
                 `File '${entry.name}' has hash '${String(actualFile.hash)}' but sub manifest hash is '${String(entry.hash)}'.`
               );
             }
+            if (actualFile.cid !== entry.cid) {
+              throw new Error(
+                `File '${entry.name}' has CID '${String(actualFile.cid)}' but sub manifest hash is '${String(entry.cid)}'.`
+              );
+            }
+            this.#files.delete(join(...path, entry.name));
             break;
 
           case "file-part":
@@ -135,8 +138,9 @@ export class PieceVerifier {
               originalFileByteLength: entry.original_file_byte_length,
               byteLength: entry.byte_length,
               cid: entry.cid,
-              rootCID: rootCID,
+              rootCID: rootCID.toString(),
             });
+            this.#files.delete(join(...path, entry.name));
             break;
 
           case "directory":
@@ -147,6 +151,7 @@ export class PieceVerifier {
               );
             }
             checkEntries([...path, entry.name], entry.contents);
+            this.#dirs.delete(join(...path, entry.name));
             break;
         }
       }
@@ -154,7 +159,20 @@ export class PieceVerifier {
 
     checkEntries([], subManifest.contents);
 
-    // TODO: Check for any remaining files / dirs that were not in the manifest
+    if (this.#files.size) {
+      throw new Error(
+        `Unpacked files that are not in the sub manifest: ${JSON.stringify(this.#files)}`
+      );
+    }
+
+    // we don't include the root directory in the manifest so remove that
+    this.#dirs.delete(".");
+
+    if (this.#dirs.size) {
+      throw new Error(
+        `Unpacked directories that are not in the sub manifest: ${JSON.stringify(this.#dirs)}`
+      );
+    }
 
     return fileParts;
   }
@@ -162,17 +180,17 @@ export class PieceVerifier {
 
 export class Verifier {
   #superManifest: SuperManifest | undefined;
-  #pieceCIDs: string[];
+  #pieceCIDs: CID[];
 
   constructor(manifest: SuperManifest | undefined) {
     this.#superManifest = manifest;
     this.#pieceCIDs = [];
   }
 
-  addPiece(piece: PieceVerifier, pieceCid: string): void {
-    if (this.#pieceCIDs.includes(pieceCid)) {
+  addPiece(piece: PieceVerifier, pieceCID: CID): void {
+    if (this.#pieceCIDs.includes(pieceCID)) {
       throw new Error(
-        `Piece CID (CommP) '${pieceCid}' already processed, only provide unique CAR files`
+        `Piece CID (CommP) '${pieceCID.toString()}' already processed, only provide unique CAR files`
       );
     }
 
@@ -198,11 +216,11 @@ export class Verifier {
 
       // Check that this CAR is a piece CID (CommP) from the super manifest
       const found = this.#superManifest.pieces.find(
-        (piece) => piece.piece_cid === pieceCid
+        (piece) => piece.piece_cid === pieceCID.toString()
       );
       if (!found) {
         throw new Error(
-          `Piece CID (CommP) '${pieceCid}' does not match any pieces from super manifest`
+          `Piece CID (CommP) '${pieceCID.toString()}' does not match any pieces from super manifest`
         );
       }
 
@@ -211,7 +229,7 @@ export class Verifier {
       // TODO: Check that there are no extra files or directories that are not in the super manifest
     }
 
-    this.#pieceCIDs.push(pieceCid);
+    this.#pieceCIDs.push(pieceCID);
   }
 
   verifyPieces(splitFiles: Map<string, VerificationSplitFile>) {

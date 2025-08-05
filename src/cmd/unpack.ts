@@ -11,6 +11,7 @@ import { CarIndexedReader, RawLocation } from "@ipld/car/indexed-reader";
 import { CarIndexer } from "@ipld/car/indexer";
 import { createParseStream } from "big-json";
 import { recursive as exporter } from "ipfs-unixfs-exporter";
+import { CID } from "multiformats/cid";
 
 import { SubManifest, SuperManifest } from "../manifest.js";
 import {
@@ -139,8 +140,8 @@ export default async function unpack(
     if (!pieceCid) {
       throw new Error("Failed to get CommP from stream");
     }
-    fileParts.push(...pieceVerifier.verify(subManifest, rootCID.toString()));
-    verifier.addPiece(pieceVerifier, pieceCid.toString());
+    fileParts.push(...pieceVerifier.verify(subManifest, rootCID));
+    verifier.addPiece(pieceVerifier, CID.parse(pieceCid.toString()));
   }
 
   // After unpacking all the CARs we then attempt to join all the split files (as they

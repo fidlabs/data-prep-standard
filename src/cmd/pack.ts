@@ -54,11 +54,10 @@ export default async function pack(
 
   console.log("Scanning files for packing");
 
-  for await (const files of iterateFilesFromPathsWithSize(
-    filePaths,
-    targetCarSize,
-    opts.lite ?? false
-  )) {
+  for await (const files of iterateFilesFromPathsWithSize(filePaths, {
+    nBytes: targetCarSize,
+    lite: opts.lite,
+  })) {
     const subManifest = manifest.newSubManifest();
     const pieceTemporaryFilename = `piece.car.streaming`;
 

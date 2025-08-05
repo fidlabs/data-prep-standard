@@ -39,14 +39,18 @@ const splitFileIfOverPercentage = 50;
 
 export const iterateFilesFromPathsWithSize = async function* (
   filePaths: string[],
-  nBytes = 31 * 1024 * 1024 * 1024,
-  lite: boolean
+  opts?: {
+    nBytes?: number;
+    lite?: boolean;
+  }
 ): AsyncGenerator<SplitFileLike[], void, void> {
   const allFiles = await filesFromPaths(filePaths, {
     fs: { createReadStream, promises: { readdir, stat } },
   });
   let bytes = 0;
   const files: SplitFileLike[] = [];
+  const nBytes = opts?.nBytes ?? 31 * 1024 * 1024 * 1024;
+  const lite = opts?.lite ?? false;
 
   const nextBatch = () => {
     files.length = 0;

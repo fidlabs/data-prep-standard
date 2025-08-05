@@ -63,7 +63,7 @@ export class PieceVerifier {
 
   getSubManifest(): SubManifest {
     if (!this.#subManifest) {
-      throw new Error("getManifest() called before verify");
+      throw new Error("No sub manifest found. Did you call getSubManifest before Verify?");
     }
     return this.#subManifest;
   }

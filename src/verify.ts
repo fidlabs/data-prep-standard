@@ -40,7 +40,7 @@ function manifestKeyCheck(
 ) {
   if (sub[key] !== sup[key]) {
     throw new Error(
-      `Verification failed during manifestKeyCheck, expected '${JSON.stringify(sup[key])}', got '${JSON.stringify(sub[key])}'`
+      `Verification failed during manifest '${key}' check, expected '${JSON.stringify(sup[key])}', got '${JSON.stringify(sub[key])}'`
     );
   }
 }
@@ -63,7 +63,9 @@ export class PieceVerifier {
 
   getSubManifest(): SubManifest {
     if (!this.#subManifest) {
-      throw new Error("No sub manifest found. Did you call getSubManifest before Verify?");
+      throw new Error(
+        "No sub manifest found. Did you call getSubManifest before Verify?"
+      );
     }
     return this.#subManifest;
   }
@@ -83,9 +85,6 @@ export class PieceVerifier {
     if (!subManifest.contents) {
       return [];
     }
-
-    console.log("files", this.#files);
-    console.log("dirs", this.#dirs);
 
     // Go through the manifest checking that all the files and directories have been added
     const checkEntries = (

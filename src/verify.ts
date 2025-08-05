@@ -190,7 +190,7 @@ export class Verifier {
   addPiece(piece: PieceVerifier, pieceCID: CID): void {
     if (this.#pieceCIDs.includes(pieceCID)) {
       throw new Error(
-        `Piece CID (CommP) '${pieceCID.toString()}' already processed, only provide unique CAR files`
+        `Piece CID (CommP) '${pieceCID.toString()}' already processed, only provide unique Pieces`
       );
     }
 

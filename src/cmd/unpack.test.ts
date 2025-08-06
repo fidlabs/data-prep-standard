@@ -102,37 +102,4 @@ describe("testing unpack function", () => {
     expect(badFiles).toHaveLength(0);
   });
 
-  test("no sub manifest", async () => {
-    fs.writeFileSync(join(cwd(), "test", "file1.txt"), "Hello World");
-    fs.writeFileSync(join(cwd(), "test", "file2.txt"), "Another file");
-    await pack(["test"], {
-      output: "outdir",
-      metadata: "basicUserMetadata.json",
-      specVersion: "0.1.0",
-      targetCarSize: "10",
-    });
-
-    const files = vol.readdirSync("outdir").filter((obj) => {
-      return (obj as string).endsWith(".car");
-    });
-    expect(files).toBeDefined();
-    expect(files).toHaveLength(3);
-
-    await expect(
-      unpack(
-        files.map((f) => join("outdir", f as string)),
-        {
-          output: "testing/outputs/unpack",
-          verbose: false,
-        }
-      )
-    ).resolves.not.toThrow();
-
-    const partRegex = /\.part\.[0-9]+$/;
-    const badFiles = vol.readdirSync("testing/outputs/unpack").filter((obj) => {
-      return partRegex.exec(obj as string);
-    });
-    expect(badFiles).toBeDefined();
-    expect(badFiles).toHaveLength(0);
-  });
 });

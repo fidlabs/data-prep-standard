@@ -4,7 +4,7 @@ import { execaSync } from "execa";
 const binPath = "./dist/bin.js";
 
 describe("unpack", function () {
-  test("unpack many files", () => {
+  test("unpack with super manifest", () => {
     expect(() => {
       const { stdout } = execaSync(binPath, [
         "unpack",

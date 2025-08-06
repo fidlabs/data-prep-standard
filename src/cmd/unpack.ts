@@ -1,6 +1,11 @@
 /* eslint-disable n/no-unsupported-features/node-builtins */
 import { createHash } from "node:crypto";
-import { createReadStream, createWriteStream, readFileSync } from "node:fs";
+import {
+  createReadStream,
+  createWriteStream,
+  readdirSync,
+  readFileSync,
+} from "node:fs";
 import { mkdir, unlink } from "node:fs/promises";
 import { join, sep } from "node:path";
 import { Readable } from "node:stream";
@@ -172,15 +177,18 @@ export default async function unpack(
   for (const splitFile of splitFiles.values()) {
     console.log("joining", splitFile);
     const stream = async (splitFile: VerificationSplitFile): Promise<void> => {
-      const writeStream = createWriteStream(splitFile.name, {
-        autoClose: false,
-      });
+      const writeStream = createWriteStream(join(opts.output, splitFile.name));
       for (const filePart of splitFile.parts.sort((a, b) =>
         a.name.localeCompare(b.name)
       )) {
-        await pipeline(createReadStream(filePart.name), writeStream);
-        console.log("unlink", filePart.name);
-        await unlink(filePart.name);
+        console.log("cat", filePart.name, readdirSync(opts.output));
+        await pipeline(
+          createReadStream(join(opts.output, filePart.name)),
+          writeStream,
+          { end: false }
+        );
+        console.log("unlink", join(opts.output, filePart.name));
+        await unlink(join(opts.output, filePart.name));
       }
       writeStream.close();
     };

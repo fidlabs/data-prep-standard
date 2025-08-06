@@ -96,6 +96,7 @@ export default async function unpack(
         return block.bytes;
       },
     });
+    await reader.close();
 
     const pieceVerifier = new PieceVerifier(file);
     let subManifest: SubManifest | undefined;

@@ -1,5 +1,6 @@
 /* eslint-disable n/no-unsupported-features/node-builtins */
 import {
+  createReadStream,
   createWriteStream,
   existsSync,
   mkdirSync,
@@ -9,7 +10,7 @@ import {
 } from "node:fs";
 import { open } from "node:fs/promises";
 import { join } from "node:path";
-import { Writable } from "node:stream";
+import { Readable, Writable } from "node:stream";
 
 import { createCommPStream } from "@filoz/synapse-sdk/commp";
 import { CarWriter } from "@ipld/car/writer";
@@ -68,35 +69,46 @@ export default async function pack(
       subManifest
     );
 
-    const { stream: commPTransform, getCommP } = createCommPStream();
     const carEncoder = new CAREncoderStream([placeholderCID]);
 
     try {
-      await stream
-        .pipeThrough(carEncoder)
-        .pipeThrough(commPTransform)
-        .pipeTo(
-          Writable.toWeb(
-            createWriteStream(join(opts.output, pieceTemporaryFilename), {
-              autoClose: true,
-              // Without this the entire sub-manifest gets cached in memory before being
-              // written to disk
-              highWaterMark: 1,
-            })
-          ) as WritableStream<Buffer>
-        );
+      await stream.pipeThrough(carEncoder).pipeTo(
+        Writable.toWeb(
+          createWriteStream(join(opts.output, pieceTemporaryFilename), {
+            autoClose: true,
+            // Without this the entire sub-manifest gets cached in memory before being
+            // written to disk
+            highWaterMark: 1,
+          })
+        ) as WritableStream<Buffer>
+      );
 
       if (!carEncoder.finalBlock) {
         throw new Error("Failed to get final block from CAR stream");
       }
       const rootCID = CID.parse(carEncoder.finalBlock.cid.toString());
 
+      // update root in CAR header
+      const fd = await open(join(opts.output, pieceTemporaryFilename), "r+");
+      await CarWriter.updateRootsInFile(fd, [rootCID]);
+      await fd.close();
+
+      // We need to stream the whole file again to get the piece CID for the
+      // CAR with updated root header :(
+      const { stream: commPTransform, getCommP } = createCommPStream();
+      await Readable.toWeb(
+        createReadStream(join(opts.output, pieceTemporaryFilename))
+      )
+        .pipeThrough(commPTransform)
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        .pipeTo(new WritableStream({ write: () => {} }));
+
       // Bit tortured to get the CID as FilOz use a 'legacy' type in preparation for Piece V2.
-      const streamCommP = getCommP();
-      if (!streamCommP) {
+      const commP = getCommP();
+      if (!commP) {
         throw new Error("Failed to get CommP from stream");
       }
-      const pieceCID = CID.parse(streamCommP.toString());
+      const pieceCID = CID.parse(commP.toString());
 
       console.log(
         `Packing completed, root CID: ${rootCID.toString()}, piece CID: ${pieceCID.toString()}`
@@ -104,11 +116,6 @@ export default async function pack(
 
       await subManifestPromise;
       manifest.addPiece(subManifest, pieceCID, rootCID);
-
-      // update roots in CAR header
-      const fd = await open(join(opts.output, pieceTemporaryFilename), "r+");
-      await CarWriter.updateRootsInFile(fd, [rootCID]);
-      await fd.close();
 
       renameSync(
         join(opts.output, pieceTemporaryFilename),

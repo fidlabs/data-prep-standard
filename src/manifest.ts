@@ -157,7 +157,7 @@ export class Manifest implements SuperManifest {
     return {
       "@spec": this["@spec"],
       "@spec_version": this["@spec_version"],
-      uuid: randomUUID(),
+      uuid: this.uuid,
       name: this.name,
       description: this.description,
       version: this.version,

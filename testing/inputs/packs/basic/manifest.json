@@ -1,7 +1,7 @@
 {
   "@spec": "https://raw.githubusercontent.com/fidlabs/data-prep-standard/refs/heads/main/specification/v0/FilecoinDataPreparationManifestSpecification.md",
   "@spec_version": "0.1.0",
-  "uuid": "b4488aca-7af4-4bb1-8b71-5ef2ddf005a8",
+  "uuid": "7da664bd-565e-4505-bdff-b9abffd2a6b7",
   "name": "basic",
   "description": "basic test metadata",
   "version": "2025/06/15",
@@ -11,8 +11,8 @@
   "open_with": "browser",
   "pieces": [
     {
-      "piece_cid": "baga6ea4seaqngw5trnzawpklhxag6vi25y4hwkzlywtdhehed5ln56zmjkjeoja",
-      "payload_cid": "bafybeihfmvwkwudm6jdqnknqrzc4h52pz2kru24alg6pchcqxwu2vfamqu"
+      "piece_cid": "baga6ea4seaqckdklt55ec4ayuc5sfmplaebprvfabchwnyeolwv7v4y6ljqxgfi",
+      "payload_cid": "bafybeie7poazgv7xo4ec7zg6twnuec6qinb3jwqmv6tgu3gbb6olbhlh6q"
     }
   ],
   "contents": [
@@ -22,7 +22,7 @@
       "cid": "bafkreic7oc7rriegabybn2kiwbfo2o4cca5dnpvec5k3nto7v4ikzy6g54",
       "hash": "5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
       "byte_length": 1024,
-      "piece_cid": "baga6ea4seaqngw5trnzawpklhxag6vi25y4hwkzlywtdhehed5ln56zmjkjeoja"
+      "piece_cid": "baga6ea4seaqckdklt55ec4ayuc5sfmplaebprvfabchwnyeolwv7v4y6ljqxgfi"
     },
     {
       "@type": "file",
@@ -30,7 +30,7 @@
       "cid": "bafkreihfuafktgi2zcs64mijqrgyjjkvqo6savzk2p742qtzf46dnmmdvu",
       "hash": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
       "byte_length": 2048,
-      "piece_cid": "baga6ea4seaqngw5trnzawpklhxag6vi25y4hwkzlywtdhehed5ln56zmjkjeoja"
+      "piece_cid": "baga6ea4seaqckdklt55ec4ayuc5sfmplaebprvfabchwnyeolwv7v4y6ljqxgfi"
     },
     {
       "@type": "directory",
@@ -42,7 +42,7 @@
           "cid": "bafkreihfuafktgi2zcs64mijqrgyjjkvqo6savzk2p742qtzf46dnmmdvu",
           "hash": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
           "byte_length": 2048,
-          "piece_cid": "baga6ea4seaqngw5trnzawpklhxag6vi25y4hwkzlywtdhehed5ln56zmjkjeoja"
+          "piece_cid": "baga6ea4seaqckdklt55ec4ayuc5sfmplaebprvfabchwnyeolwv7v4y6ljqxgfi"
         }
       ]
     }

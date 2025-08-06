@@ -8,7 +8,7 @@ describe("unpack", function () {
     expect(() => {
       const { stdout } = execaSync(binPath, [
         "unpack",
-        "-m",
+        "-s",
         "testing/inputs/packs/basic/manifest.json",
         "-o",
         "testing/outputs/unpack.e2e.basic",

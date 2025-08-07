@@ -6,6 +6,7 @@ import {
   SubManifest,
   SubManifestContentEntry,
   SuperManifest,
+  SuperManifestContentEntry,
 } from "./manifest.js";
 
 export interface VerificationFile {
@@ -15,10 +16,8 @@ export interface VerificationFile {
 }
 
 export interface VerificationSplitFile {
-  name: string;
   hash: string;
   byteLength: number;
-  parts: VerificationFilePart[];
 }
 
 export interface VerificationFilePart {
@@ -232,10 +231,51 @@ export class Verifier {
         );
       }
 
-      // TODO: Check all the joined files are complete
+      if (!this.#superManifest.contents) {
+        return;
+      }
 
-      // TODO: check there are no missing joined files
-      console.log(splitFiles);
+      // Go through the manifest checking that all the split files
+      const checkEntries = (
+        path: string[],
+        entries: SuperManifestContentEntry[]
+      ) => {
+        for (const entry of entries) {
+          switch (entry["@type"]) {
+            case "split-file":
+              const actualFile = splitFiles.get(join(...path, entry.name));
+              if (!actualFile) {
+                throw new Error(
+                  `Split file '${join(...path, entry.name)} in sub manifest but not extracted from ant CAR.`
+                );
+              }
+              if (actualFile.byteLength !== entry.byte_length) {
+                throw new Error(
+                  `File '${entry.name}' has size '${String(actualFile.byteLength)}' but super manifest size is '${String(entry.byte_length)}'.`
+                );
+              }
+              if (actualFile.hash !== entry.hash) {
+                throw new Error(
+                  `File '${entry.name}' has hash '${String(actualFile.hash)}' but super manifest hash is '${String(entry.hash)}'.`
+                );
+              }
+              splitFiles.delete(join(...path, entry.name));
+              break;
+
+            case "directory":
+              checkEntries([...path, entry.name], entry.contents);
+              break;
+          }
+        }
+      };
+
+      checkEntries([], this.#superManifest.contents);
+
+      if (splitFiles.size) {
+        throw new Error(
+          `Unpacked split files that are not in the super manifest: ${JSON.stringify(splitFiles)}`
+        );
+      }
     }
   }
 }

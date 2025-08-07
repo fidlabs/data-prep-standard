@@ -1,7 +1,7 @@
 import { describe, expect, test } from "@jest/globals";
 import { CID } from "multiformats";
 
-import { SubManifest, SuperManifest } from "./manifest.js";
+import { SubManifest, SuperManifest, SuperManifestContentDirectory } from "./manifest.js";
 import { VerificationSplitFile } from "./verify.js";
 
 const { Verifier } = await import("./verify.js");
@@ -454,4 +454,310 @@ describe("super manifest verifier", () => {
       verifier.verifyPieces(new Map<string, VerificationSplitFile>());
     }).toThrow();
   });
+
+  test("split file happy day", () => {
+    const manifest: SuperManifest = {
+      "@spec": "spec link",
+      "@spec_version": "0.1.0",
+      name: "Test Manifest",
+      description: "This is a test manifest",
+      version: "1.0.0",
+      license: "MIT",
+      project_url: "https://example.com",
+      open_with: "test-app",
+      uuid: "33A62D5C-F2F3-4305-929F-D981D0FA1BE1",
+      n_pieces: 2,
+      pieces: [
+        {
+          payload_cid:
+            "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+          piece_cid:
+            "bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u",
+        },
+        {
+          payload_cid:
+            "bafybeicavh5ivvh6iuwaos53ijftaijdoyluhoj7t5n5zo2p6gn5gfown4",
+          piece_cid:
+            "bafkreic7oc7rriegabybn2kiwbfo2o4cca5dnpvec5k3nto7v4ikzy6g54",
+        },
+      ],
+      contents: [
+        {
+          "@type": "directory",
+          name: "test-dir",
+          contents: [
+            {
+              "@type": "split-file",
+              name: "file1.txt",
+              hash: "12345abcdef67890",
+              byte_length: 5678,
+              parts: [
+                {
+                  name: "file1.txt.part.0",
+                  cid: "bafybeieplyjzhimptinwi5ufo3hlhum7svpq5r3g5f7jhynolvtvn3w77i",
+                  byte_length: 1234,
+                  piece_cid:
+                    "bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u",
+                },
+                {
+                  name: "file1.txt.part.1",
+                  cid: "bafybeidh7dkgpt5u6cgpywlxkimm2wzuc5cerksvovkd5asagdhuottl2i",
+                  byte_length: 4444,
+                  piece_cid:
+                    "bafkreic7oc7rriegabybn2kiwbfo2o4cca5dnpvec5k3nto7v4ikzy6g54",
+                },
+              ]
+            },
+          ],
+        },
+      ],
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { contents, pieces, n_pieces, ...rest } = manifest;
+
+    const subManifest1: SubManifest = {
+      ...rest,
+      contents: [
+        {
+          "@type": "directory",
+          name: "test-dir",
+          contents: [
+            {
+              "@type": "file-part",
+              name: "file1.txt.part.0",
+              byte_length: 1234,
+              cid: "bafybeieplyjzhimptinwi5ufo3hlhum7svpq5r3g5f7jhynolvtvn3w77i",
+              original_file_byte_length: 5678,
+              original_file_hash: "12345abcdef67890",
+              original_file_name: "file1.txt"
+            },
+          ],
+        },
+      ],
+    };
+
+    const subManifest2: SubManifest = {
+      ...rest,
+      contents: [
+        {
+          "@type": "directory",
+          name: "test-dir",
+          contents: [
+            {
+              "@type": "file-part",
+              name: "file1.txt.part.1",
+              byte_length: 4444,
+              cid: "bafybeieplyjzhimptinwi5ufo3hlhum7svpq5r3g5f7jhynolvtvn3w77i",
+              original_file_byte_length: 5678,
+              original_file_hash: "12345abcdef67890",
+              original_file_name: "file1.txt"
+            },
+          ],
+        },
+      ],
+    };
+
+    const verifier = new Verifier(manifest);
+
+    const piece1Verifier = verifier.newPieceVerifier(
+      "path/to/carFile.car",
+      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
+    );
+    piece1Verifier.addDirectory("test-dir");
+    piece1Verifier.addFile("test-dir/file1.txt.part.0", {
+      hash: "1234567890abcdef",
+      cid: "bafybeieplyjzhimptinwi5ufo3hlhum7svpq5r3g5f7jhynolvtvn3w77i",
+      byteLength: 1234,
+    });
+
+    expect(() => {
+      piece1Verifier.verify(
+        subManifest1,
+        CID.parse("bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi")
+      );
+    }).not.toThrow();
+
+    const piece2Verifier = verifier.newPieceVerifier(
+      "path/to/another/carFile.car",
+      CID.parse("bafkreic7oc7rriegabybn2kiwbfo2o4cca5dnpvec5k3nto7v4ikzy6g54")
+    );
+    piece2Verifier.addDirectory("test-dir");
+    piece2Verifier.addFile("test-dir/file1.txt.part.1", {
+      hash: "abcdef1234567890",
+      cid: "bafkreihfuafktgi2zcs64mijqrgyjjkvqo6savzk2p742qtzf46dnmmdvu",
+      byteLength: 4444,
+    });
+
+    expect(() => {
+      piece2Verifier.verify(
+        subManifest2,
+        CID.parse("bafybeidh7dkgpt5u6cgpywlxkimm2wzuc5cerksvovkd5asagdhuottl2i")
+      );
+    }).not.toThrow();
+
+    const joinedFiles = new Map<string, VerificationSplitFile>;
+    joinedFiles.set("test-dir/file1.txt", {
+      hash: "12345abcdef67890",
+      byteLength: 5678,
+    })
+
+    expect(() => {
+      verifier.verifyPieces(joinedFiles);
+    }).not.toThrow();
+
+  });
+
+  test("split file bad hash", () => {
+    const manifest: SuperManifest = {
+      "@spec": "spec link",
+      "@spec_version": "0.1.0",
+      name: "Test Manifest",
+      description: "This is a test manifest",
+      version: "1.0.0",
+      license: "MIT",
+      project_url: "https://example.com",
+      open_with: "test-app",
+      uuid: "33A62D5C-F2F3-4305-929F-D981D0FA1BE1",
+      n_pieces: 2,
+      pieces: [
+        {
+          payload_cid:
+            "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+          piece_cid:
+            "bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u",
+        },
+        {
+          payload_cid:
+            "bafybeicavh5ivvh6iuwaos53ijftaijdoyluhoj7t5n5zo2p6gn5gfown4",
+          piece_cid:
+            "bafkreic7oc7rriegabybn2kiwbfo2o4cca5dnpvec5k3nto7v4ikzy6g54",
+        },
+      ],
+      contents: [
+        {
+          "@type": "directory",
+          name: "test-dir",
+          contents: [
+            {
+              "@type": "split-file",
+              name: "file1.txt",
+              hash: "12345abcdef67890",
+              byte_length: 5678,
+              parts: [
+                {
+                  name: "file1.txt.part.0",
+                  cid: "bafybeieplyjzhimptinwi5ufo3hlhum7svpq5r3g5f7jhynolvtvn3w77i",
+                  byte_length: 1234,
+                  piece_cid:
+                    "bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u",
+                },
+                {
+                  name: "file1.txt.part.1",
+                  cid: "bafybeidh7dkgpt5u6cgpywlxkimm2wzuc5cerksvovkd5asagdhuottl2i",
+                  byte_length: 4444,
+                  piece_cid:
+                    "bafkreic7oc7rriegabybn2kiwbfo2o4cca5dnpvec5k3nto7v4ikzy6g54",
+                },
+              ]
+            },
+          ],
+        },
+      ],
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { contents, pieces, n_pieces, ...rest } = manifest;
+
+    const subManifest1: SubManifest = {
+      ...rest,
+      contents: [
+        {
+          "@type": "directory",
+          name: "test-dir",
+          contents: [
+            {
+              "@type": "file-part",
+              name: "file1.txt.part.0",
+              byte_length: 1234,
+              cid: "bafybeieplyjzhimptinwi5ufo3hlhum7svpq5r3g5f7jhynolvtvn3w77i",
+              original_file_byte_length: 5678,
+              original_file_hash: "12345abcdef67890",
+              original_file_name: "file1.txt"
+            },
+          ],
+        },
+      ],
+    };
+
+    const subManifest2: SubManifest = {
+      ...rest,
+      contents: [
+        {
+          "@type": "directory",
+          name: "test-dir",
+          contents: [
+            {
+              "@type": "file-part",
+              name: "file1.txt.part.1",
+              byte_length: 4444,
+              cid: "bafybeieplyjzhimptinwi5ufo3hlhum7svpq5r3g5f7jhynolvtvn3w77i",
+              original_file_byte_length: 5678,
+              original_file_hash: "12345abcdef67890",
+              original_file_name: "file1.txt"
+            },
+          ],
+        },
+      ],
+    };
+
+    const verifier = new Verifier(manifest);
+
+    const piece1Verifier = verifier.newPieceVerifier(
+      "path/to/carFile.car",
+      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
+    );
+    piece1Verifier.addDirectory("test-dir");
+    piece1Verifier.addFile("test-dir/file1.txt.part.0", {
+      hash: "1234567890abcdef",
+      cid: "bafybeieplyjzhimptinwi5ufo3hlhum7svpq5r3g5f7jhynolvtvn3w77i",
+      byteLength: 1234,
+    });
+
+    expect(() => {
+      piece1Verifier.verify(
+        subManifest1,
+        CID.parse("bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi")
+      );
+    }).not.toThrow();
+
+    const piece2Verifier = verifier.newPieceVerifier(
+      "path/to/another/carFile.car",
+      CID.parse("bafkreic7oc7rriegabybn2kiwbfo2o4cca5dnpvec5k3nto7v4ikzy6g54")
+    );
+    piece2Verifier.addDirectory("test-dir");
+    piece2Verifier.addFile("test-dir/file1.txt.part.1", {
+      hash: "abcdef1234567890",
+      cid: "bafkreihfuafktgi2zcs64mijqrgyjjkvqo6savzk2p742qtzf46dnmmdvu",
+      byteLength: 4444,
+    });
+
+    expect(() => {
+      piece2Verifier.verify(
+        subManifest2,
+        CID.parse("bafybeidh7dkgpt5u6cgpywlxkimm2wzuc5cerksvovkd5asagdhuottl2i")
+      );
+    }).not.toThrow();
+
+    const joinedFiles = new Map<string, VerificationSplitFile>;
+    joinedFiles.set("test-dir/file1.txt", {
+      hash: "1234123412341234",
+      byteLength: 5678,
+    })
+
+    expect(() => {
+      verifier.verifyPieces(joinedFiles);
+    }).toThrow();
+  });
+
 });

@@ -8,7 +8,7 @@ import {
 } from "node:fs";
 import { mkdir, unlink } from "node:fs/promises";
 import { join, sep } from "node:path";
-import { Readable } from "node:stream";
+import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 
 import { createCommPStream } from "@filoz/synapse-sdk/commp";
@@ -155,38 +155,41 @@ export default async function unpack(
   // After unpacking all the CARs we then attempt to join all the split files (as they
   // could have been split between any of the supplied CARs)
 
-  const splitFiles = fileParts.reduce<Map<string, VerificationSplitFile>>(
+  const splitFiles = fileParts.reduce<Map<string, VerificationFilePart[]>>(
     (
-      map: Map<string, VerificationSplitFile>,
+      map: Map<string, VerificationFilePart[]>,
       filePart: VerificationFilePart
     ) => {
       if (!map.has(filePart.originalFileName)) {
-        map.set(filePart.originalFileName, {
-          name: filePart.originalFileName,
-          hash: filePart.originalFileHash,
-          byteLength: filePart.originalFileByteLength,
-          parts: [],
-        });
+        map.set(filePart.originalFileName, []);
       }
-      map.get(filePart.originalFileName)?.parts.push(filePart);
+      map.get(filePart.originalFileName)?.push(filePart);
       return map;
     },
-    new Map<string, VerificationSplitFile>()
+    new Map<string, VerificationFilePart[]>()
   );
 
-  verifier.verifyPieces(splitFiles);
+  const joinedFiles = new Map<string, VerificationSplitFile>
 
   const promises: Promise<void>[] = [];
-  for (const splitFile of splitFiles.values()) {
-    console.log("joining", splitFile);
-    const stream = async (splitFile: VerificationSplitFile): Promise<void> => {
-      const writeStream = createWriteStream(join(opts.output, splitFile.name));
-      for (const filePart of splitFile.parts.sort((a, b) =>
+  for (const [path, parts] of splitFiles.entries()) {
+    console.log("joining", path);
+    const stream = async (path: string, parts: VerificationFilePart[]): Promise<void> => {
+      const hasher = createHash("sha256").setEncoding("hex");
+      const writeStream = createWriteStream(join(opts.output, path));
+      for (const filePart of parts.sort((a, b) =>
         a.name.localeCompare(b.name)
       )) {
         console.log("cat", filePart.name, readdirSync(opts.output));
         await pipeline(
           createReadStream(join(opts.output, filePart.name)),
+          new Transform({
+            transform(chunk: Uint8Array, _encoding, callback) {
+              hasher.update(chunk);
+              this.push(chunk);
+              callback();
+            }
+          }),
           writeStream,
           { end: false }
         );
@@ -194,8 +197,15 @@ export default async function unpack(
         await unlink(join(opts.output, filePart.name));
       }
       writeStream.close();
+      joinedFiles.set(path, {
+        hash: hasher.digest("hex"),
+        byteLength: writeStream.bytesWritten
+      })
     };
-    promises.push(stream(splitFile));
+    promises.push(stream(path, parts));
   }
   await Promise.all(promises);
+
+  // Final verification of the unpacked directory tree including the joined files
+  verifier.verifyPieces(joinedFiles);
 }

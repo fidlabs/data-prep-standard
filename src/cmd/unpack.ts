@@ -20,7 +20,6 @@ import { CID } from "multiformats/cid";
 
 import { SubManifest, SuperManifest } from "../manifest.js";
 import {
-  PieceVerifier,
   VerificationFilePart,
   VerificationSplitFile,
   Verifier,
@@ -98,7 +97,15 @@ export default async function unpack(
     });
     await reader.close();
 
-    const pieceVerifier = new PieceVerifier(file);
+    const pieceCid = getCommP();
+    if (!pieceCid) {
+      throw new Error("Failed to get CommP from stream");
+    }
+
+    const pieceVerifier = verifier.newPieceVerifier(
+      file,
+      CID.parse(pieceCid.toString())
+    );
     let subManifest: SubManifest | undefined;
 
     for await (const entry of entries) {
@@ -142,12 +149,7 @@ export default async function unpack(
       throw new Error(`Sub manifest not found in CAR '${file}'`);
     }
     console.log("sub manifest", JSON.stringify(subManifest, null, 2));
-    const pieceCid = getCommP();
-    if (!pieceCid) {
-      throw new Error("Failed to get CommP from stream");
-    }
     fileParts.push(...pieceVerifier.verify(subManifest, rootCID));
-    verifier.addPiece(pieceVerifier, CID.parse(pieceCid.toString()));
   }
 
   // After unpacking all the CARs we then attempt to join all the split files (as they

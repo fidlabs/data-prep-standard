@@ -101,5 +101,4 @@ describe("testing unpack function", () => {
     expect(badFiles).toBeDefined();
     expect(badFiles).toHaveLength(0);
   });
-
 });

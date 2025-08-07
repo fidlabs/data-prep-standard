@@ -2,8 +2,9 @@ import { describe, expect, test } from "@jest/globals";
 import { CID } from "multiformats";
 
 import { SubManifest, SuperManifest } from "./manifest.js";
+import { VerificationSplitFile } from "./verify.js";
 
-const { PieceVerifier, Verifier } = await import("./verify.js");
+const { Verifier } = await import("./verify.js");
 
 describe("piece verifier", () => {
   let manifest: SuperManifest;
@@ -72,7 +73,11 @@ describe("piece verifier", () => {
   });
 
   test("simple happy day", () => {
-    const pieceVerifier = new PieceVerifier("path/to/carFile.car");
+    const verifier = new Verifier();
+    const pieceVerifier = verifier.newPieceVerifier(
+      "path/to/carFile.car",
+      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
+    );
     pieceVerifier.addDirectory("test-dir");
     pieceVerifier.addFile("test-dir/file1.txt", {
       hash: "1234567890abcdef",
@@ -89,7 +94,11 @@ describe("piece verifier", () => {
   });
 
   test("missing file", () => {
-    const pieceVerifier = new PieceVerifier("path/to/carFile.car");
+    const verifier = new Verifier();
+    const pieceVerifier = verifier.newPieceVerifier(
+      "path/to/carFile.car",
+      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
+    );
     pieceVerifier.addDirectory("test-dir");
 
     expect(() =>
@@ -101,7 +110,11 @@ describe("piece verifier", () => {
   });
 
   test("extra file", () => {
-    const pieceVerifier = new PieceVerifier("path/to/carFile.car");
+    const verifier = new Verifier();
+    const pieceVerifier = verifier.newPieceVerifier(
+      "path/to/carFile.car",
+      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
+    );
     pieceVerifier.addDirectory("test-dir");
     pieceVerifier.addFile("test-dir/file1.txt", {
       hash: "1234567890abcdef",
@@ -123,7 +136,11 @@ describe("piece verifier", () => {
   });
 
   test("missing dir", () => {
-    const pieceVerifier = new PieceVerifier("path/to/carFile.car");
+    const verifier = new Verifier();
+    const pieceVerifier = verifier.newPieceVerifier(
+      "path/to/carFile.car",
+      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
+    );
     pieceVerifier.addFile("test-dir/file1.txt", {
       hash: "1234567890abcdef",
       cid: "bafybeieplyjzhimptinwi5ufo3hlhum7svpq5r3g5f7jhynolvtvn3w77i",
@@ -139,7 +156,11 @@ describe("piece verifier", () => {
   });
 
   test("extra dir", () => {
-    const pieceVerifier = new PieceVerifier("path/to/carFile.car");
+    const verifier = new Verifier();
+    const pieceVerifier = verifier.newPieceVerifier(
+      "path/to/carFile.car",
+      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
+    );
     pieceVerifier.addDirectory("test-dir");
     pieceVerifier.addFile("test-dir/file1.txt", {
       hash: "1234567890abcdef",
@@ -157,7 +178,11 @@ describe("piece verifier", () => {
   });
 
   test("bad hash", () => {
-    const pieceVerifier = new PieceVerifier("path/to/carFile.car");
+    const verifier = new Verifier();
+    const pieceVerifier = verifier.newPieceVerifier(
+      "path/to/carFile.car",
+      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
+    );
     pieceVerifier.addDirectory("test-dir");
     pieceVerifier.addFile("test-dir/file1.txt", {
       hash: "0000001",
@@ -174,7 +199,11 @@ describe("piece verifier", () => {
   });
 
   test("wrong file CID", () => {
-    const pieceVerifier = new PieceVerifier("path/to/carFile.car");
+    const verifier = new Verifier();
+    const pieceVerifier = verifier.newPieceVerifier(
+      "path/to/carFile.car",
+      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
+    );
     pieceVerifier.addDirectory("test-dir");
     pieceVerifier.addFile("test-dir/file1.txt", {
       hash: "1234567890abcdef",
@@ -191,7 +220,11 @@ describe("piece verifier", () => {
   });
 
   test("wrong byte length", () => {
-    const pieceVerifier = new PieceVerifier("path/to/carFile.car");
+    const verifier = new Verifier();
+    const pieceVerifier = verifier.newPieceVerifier(
+      "path/to/carFile.car",
+      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
+    );
     pieceVerifier.addDirectory("test-dir");
     pieceVerifier.addFile("test-dir/file1.txt", {
       hash: "1234567890abcdef",
@@ -208,10 +241,9 @@ describe("piece verifier", () => {
   });
 });
 
-describe("verifier", () => {
+describe("super manifest verifier", () => {
   let manifest: SuperManifest;
   let subManifest: SubManifest;
-  const pieceVerifier = new PieceVerifier("path/to/carFile.car");
 
   beforeAll(() => {
     manifest = {
@@ -273,7 +305,14 @@ describe("verifier", () => {
         },
       ],
     };
+  });
 
+  test("simple happy day", () => {
+    const verifier = new Verifier(manifest);
+    const pieceVerifier = verifier.newPieceVerifier(
+      "path/to/carFile.car",
+      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
+    );
     pieceVerifier.addDirectory("test-dir");
     pieceVerifier.addFile("test-dir/file1.txt", {
       hash: "1234567890abcdef",
@@ -281,19 +320,10 @@ describe("verifier", () => {
       byteLength: 1234,
     });
 
-    pieceVerifier.verify(
-      subManifest,
-      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
-    );
-  });
-
-  test("simple happy day", () => {
-    const verifier = new Verifier(manifest);
-
     expect(() => {
-      verifier.addPiece(
-        pieceVerifier,
-        CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
+      pieceVerifier.verify(
+        subManifest,
+        CID.parse("bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi")
       );
     }).not.toThrow();
   });
@@ -302,7 +332,7 @@ describe("verifier", () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { contents, pieces, n_pieces, ...rest } = manifest;
 
-    subManifest = {
+    const badSubManifest: SubManifest = {
       ...rest,
       "@spec_version": "9.99.9",
       contents: [
@@ -321,8 +351,11 @@ describe("verifier", () => {
         },
       ],
     };
-
-    const badPieceVerifier = new PieceVerifier("path/to/carFile.car");
+    const verifier = new Verifier(manifest);
+    const badPieceVerifier = verifier.newPieceVerifier(
+      "path/to/carFile.car",
+      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
+    );
     badPieceVerifier.addDirectory("test-dir");
     badPieceVerifier.addFile("test-dir/file1.txt", {
       hash: "1234567890abcdef",
@@ -330,16 +363,10 @@ describe("verifier", () => {
       byteLength: 1234,
     });
 
-    badPieceVerifier.verify(
-      subManifest,
-      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
-    );
-    const verifier = new Verifier(manifest);
-
     expect(() => {
-      verifier.addPiece(
-        badPieceVerifier,
-        CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
+      badPieceVerifier.verify(
+        badSubManifest,
+        CID.parse("bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi")
       );
     }).toThrow();
   });
@@ -348,10 +375,58 @@ describe("verifier", () => {
     const verifier = new Verifier(manifest);
 
     expect(() => {
-      verifier.addPiece(
-        pieceVerifier,
+      verifier.newPieceVerifier(
+        "path/to/carFile.car",
         CID.parse("bafkreiec6l7reufq36dxvbapvt6f6mivveqpqqueuknre65ylo2gqadfpa")
       );
+    }).toThrow();
+  });
+
+  test("not enough pieces", () => {
+    const twoPieceManifest = {
+      "@spec": "spec link",
+      "@spec_version": "0.1.0",
+      name: "Test Manifest",
+      description: "This is a test manifest",
+      version: "1.0.0",
+      license: "MIT",
+      project_url: "https://example.com",
+      open_with: "test-app",
+      uuid: "33A62D5C-F2F3-4305-929F-D981D0FA1BE1",
+      n_pieces: 2,
+      pieces: [
+        {
+          payload_cid:
+            "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+          piece_cid:
+            "bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u",
+        },
+        {
+          payload_cid:
+            "bafybeicavh5ivvh6iuwaos53ijftaijdoyluhoj7t5n5zo2p6gn5gfown4",
+          piece_cid:
+            "bafkreic7oc7rriegabybn2kiwbfo2o4cca5dnpvec5k3nto7v4ikzy6g54",
+        },
+      ],
+    };
+    const verifier = new Verifier(twoPieceManifest);
+    const pieceVerifier = verifier.newPieceVerifier(
+      "path/to/carFile.car",
+      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
+    );
+    pieceVerifier.addDirectory("test-dir");
+    pieceVerifier.addFile("test-dir/file1.txt", {
+      hash: "1234567890abcdef",
+      cid: "bafybeieplyjzhimptinwi5ufo3hlhum7svpq5r3g5f7jhynolvtvn3w77i",
+      byteLength: 1234,
+    });
+    pieceVerifier.verify(
+      subManifest,
+      CID.parse("bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi")
+    );
+
+    expect(() => {
+      verifier.verifyPieces(new Map<string, VerificationSplitFile>());
     }).toThrow();
   });
 });

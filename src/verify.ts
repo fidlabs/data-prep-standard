@@ -45,29 +45,18 @@ function manifestKeyCheck(
   }
 }
 
-export class PieceVerifier {
+class PieceVerifier {
   #carFile: string;
   #files: Map<string, VerificationFile>;
   #dirs: Map<string, VerificationDirectory>;
   #subManifest: SubManifest | undefined;
+  #superManifest: SuperManifest | undefined;
 
-  constructor(carFile: string) {
+  constructor(carFile: string, superManifest?: SuperManifest) {
     this.#carFile = carFile;
     this.#files = new Map<string, VerificationFile>();
     this.#dirs = new Map<string, VerificationDirectory>();
-  }
-
-  getCarFile(): string {
-    return this.#carFile;
-  }
-
-  getSubManifest(): SubManifest {
-    if (!this.#subManifest) {
-      throw new Error(
-        "No sub manifest found. Did you call getSubManifest before Verify?"
-      );
-    }
-    return this.#subManifest;
+    this.#superManifest = superManifest;
   }
 
   addFile(path: string, info: VerificationFile) {
@@ -80,7 +69,31 @@ export class PieceVerifier {
 
   verify(subManifest: SubManifest, rootCID: CID): VerificationFilePart[] {
     const fileParts: VerificationFilePart[] = [];
-    this.#subManifest = subManifest;
+
+    if (this.#superManifest) {
+      // check this piece is part of the supplied dataset
+      for (const key of [
+        "@spec_version",
+        "@spec",
+        "uuid",
+        "name",
+        "description",
+        "version",
+        "license",
+        "project_url",
+        "open_with",
+      ]) {
+        manifestKeyCheck(
+          this.#superManifest,
+          subManifest,
+          key as keyof SubManifest & keyof SuperManifest
+        );
+      }
+
+      // TODO: Check that the files, directories are all in the superManifest
+
+      // TODO: Check that there are no extra files or directories that are not in the super manifest
+    }
 
     if (!subManifest.contents) {
       return [];
@@ -146,7 +159,7 @@ export class PieceVerifier {
             const actualDir = this.#dirs.has(join(...path, entry.name));
             if (!actualDir) {
               throw new Error(
-                `Directory '${entry.name} in CAR file but not in sub manifest.`
+                `Directory '${entry.name} in sub manifest but not extracted from CAR.`
               );
             }
             checkEntries([...path, entry.name], entry.contents);
@@ -181,12 +194,12 @@ export class Verifier {
   #superManifest: SuperManifest | undefined;
   #pieceCIDs: CID[];
 
-  constructor(manifest: SuperManifest | undefined) {
+  constructor(manifest?: SuperManifest) {
     this.#superManifest = manifest;
     this.#pieceCIDs = [];
   }
 
-  addPiece(piece: PieceVerifier, pieceCID: CID): void {
+  newPieceVerifier(file: string, pieceCID: CID) {
     if (this.#pieceCIDs.includes(pieceCID)) {
       throw new Error(
         `Piece CID (CommP) '${pieceCID.toString()}' already processed, only provide unique Pieces`
@@ -194,25 +207,6 @@ export class Verifier {
     }
 
     if (this.#superManifest) {
-      // check this piece is part of the supplied dataset
-      for (const key of [
-        "@spec_version",
-        "@spec",
-        "uuid",
-        "name",
-        "description",
-        "version",
-        "license",
-        "project_url",
-        "open_with",
-      ]) {
-        manifestKeyCheck(
-          this.#superManifest,
-          piece.getSubManifest(),
-          key as keyof SubManifest & keyof SuperManifest
-        );
-      }
-
       // Check that this CAR is a piece CID (CommP) from the super manifest
       const found = this.#superManifest.pieces.find(
         (piece) => piece.piece_cid === pieceCID.toString()
@@ -223,13 +217,11 @@ export class Verifier {
           `Piece CID (CommP) '${pieceCID.toString()}' does not match any pieces from super manifest`
         );
       }
-
-      // TODO: Check that the files, directories are all in the superManifest
-
-      // TODO: Check that there are no extra files or directories that are not in the super manifest
     }
 
     this.#pieceCIDs.push(pieceCID);
+
+    return new PieceVerifier(file, this.#superManifest);
   }
 
   verifyPieces(splitFiles: Map<string, VerificationSplitFile>) {

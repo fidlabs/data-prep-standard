@@ -89,9 +89,13 @@ class PieceVerifier {
         );
       }
 
-      // TODO: Check that the files, directories are all in the superManifest
+      // We don't check the unpacked files against the super manifest contents as they will
+      // all be checked against the sub manifest contents.
 
-      // TODO: Check that there are no extra files or directories that are not in the super manifest
+      // We could choose to verify that the sub manifest and the super manifest contents
+      // are consistent, but that would be a malformed set of manifests, which is not what
+      // we are verifying here, we are verifying that all the files are as declared by the
+      // manifests.
     }
 
     if (!subManifest.contents) {

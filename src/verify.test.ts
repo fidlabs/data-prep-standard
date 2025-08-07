@@ -371,7 +371,7 @@ describe("super manifest verifier", () => {
     }).toThrow();
   });
 
-  test("different piece CID", () => {
+  test("non existant piece CID", () => {
     const verifier = new Verifier(manifest);
 
     expect(() => {
@@ -380,6 +380,31 @@ describe("super manifest verifier", () => {
         CID.parse("bafkreiec6l7reufq36dxvbapvt6f6mivveqpqqueuknre65ylo2gqadfpa")
       );
     }).toThrow();
+  });
+
+  test("repeat piece CID", () => {
+    const verifier = new Verifier(manifest);
+    const pieceVerifier = verifier.newPieceVerifier(
+      "path/to/carFile.car",
+      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
+    );
+    pieceVerifier.addDirectory("test-dir");
+    pieceVerifier.addFile("test-dir/file1.txt", {
+      hash: "1234567890abcdef",
+      cid: "bafybeieplyjzhimptinwi5ufo3hlhum7svpq5r3g5f7jhynolvtvn3w77i",
+      byteLength: 1234,
+    });
+    pieceVerifier.verify(
+      subManifest,
+      CID.parse("bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi")
+    );
+
+    expect(() => {
+      verifier.newPieceVerifier(
+        "path/to/differente/carFile.car",
+        CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
+      );
+    }).not.toThrow();
   });
 
   test("not enough pieces", () => {

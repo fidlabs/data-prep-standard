@@ -341,7 +341,9 @@ describe("super manifest verifier", () => {
     expect(() => {
       verifier.newPieceVerifier(
         "path/to/carFile.car",
-        CID.parse("bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"),
+        CID.parse(
+          "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"
+        ),
         CID.parse("bafkreiec6l7reufq36dxvbapvt6f6mivveqpqqueuknre65ylo2gqadfpa")
       );
     }).toThrow();

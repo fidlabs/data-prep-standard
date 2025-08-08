@@ -1,11 +1,6 @@
 /* eslint-disable n/no-unsupported-features/node-builtins */
 import { createHash } from "node:crypto";
-import {
-  createReadStream,
-  createWriteStream,
-  readdirSync,
-  readFileSync,
-} from "node:fs";
+import { createReadStream, createWriteStream, readFileSync } from "node:fs";
 import { mkdir, unlink } from "node:fs/promises";
 import { join, sep } from "node:path";
 import { Readable, Transform } from "node:stream";
@@ -62,17 +57,17 @@ export default async function unpack(
       commPTransform
     );
 
-    const iterable = await CarIndexer.fromIterable(Readable.fromWeb(stream));
+    const indexer = await CarIndexer.fromIterable(Readable.fromWeb(stream));
     const index = new Map<string, RawLocation>();
     const order = [];
-    for await (const { cid, blockLength, blockOffset } of iterable) {
+    for await (const { cid, blockLength, blockOffset } of indexer) {
       const cidStr = cid.toString();
       index.set(cidStr, { blockLength, blockOffset });
       order.push(cidStr);
     }
-    const roots = await iterable.getRoots();
+    const roots = await indexer.getRoots();
     const reader = new CarIndexedReader(
-      iterable.version,
+      indexer.version,
       file,
       roots,
       index,
@@ -83,7 +78,6 @@ export default async function unpack(
     if (!rootCID) {
       throw new Error(`No root CID found in CAR: ${file}`);
     }
-    console.log("rootCID", rootCID);
 
     const entries = exporter(rootCID, {
       async get(cid) {
@@ -114,7 +108,7 @@ export default async function unpack(
 
       if (entry.type === "file" || entry.type === "raw") {
         if (filePath === "manifest.json") {
-          console.log("Sub manifest found, loading");
+          console.log("Sub manifest found");
           await pipeline(
             entry.content(),
             createParseStream().on("data", (data) => {
@@ -148,12 +142,14 @@ export default async function unpack(
     if (!subManifest) {
       throw new Error(`Sub manifest not found in CAR '${file}'`);
     }
-    console.log("sub manifest", JSON.stringify(subManifest, null, 2));
     fileParts.push(...pieceVerifier.verify(subManifest, rootCID));
   }
 
   // After unpacking all the CARs we then attempt to join all the split files (as they
   // could have been split between any of the supplied CARs)
+
+  // We only support split files with full manifests (no --lite) so we have a full
+  // description of all the parts.
 
   const splitFiles = fileParts.reduce<Map<string, VerificationFilePart[]>>(
     (
@@ -169,18 +165,25 @@ export default async function unpack(
     new Map<string, VerificationFilePart[]>()
   );
 
-  const joinedFiles = new Map<string, VerificationSplitFile>
+  const joinedFiles = new Map<string, VerificationSplitFile>();
 
   const promises: Promise<void>[] = [];
   for (const [path, parts] of splitFiles.entries()) {
-    console.log("joining", path);
-    const stream = async (path: string, parts: VerificationFilePart[]): Promise<void> => {
-      const hasher = createHash("sha256").setEncoding("hex");
+    console.log(
+      "joining",
+      path,
+      "from",
+      parts.map((p) => p.name)
+    );
+    const stream = async (
+      path: string,
+      parts: VerificationFilePart[]
+    ): Promise<void> => {
+      const hasher = createHash("sha256");
       const writeStream = createWriteStream(join(opts.output, path));
       for (const filePart of parts.sort((a, b) =>
         a.name.localeCompare(b.name)
       )) {
-        console.log("cat", filePart.name, readdirSync(opts.output));
         await pipeline(
           createReadStream(join(opts.output, filePart.name)),
           new Transform({
@@ -188,19 +191,18 @@ export default async function unpack(
               hasher.update(chunk);
               this.push(chunk);
               callback();
-            }
+            },
           }),
           writeStream,
           { end: false }
         );
-        console.log("unlink", join(opts.output, filePart.name));
         await unlink(join(opts.output, filePart.name));
       }
       writeStream.close();
       joinedFiles.set(path, {
         hash: hasher.digest("hex"),
-        byteLength: writeStream.bytesWritten
-      })
+        byteLength: writeStream.bytesWritten,
+      });
     };
     promises.push(stream(path, parts));
   }

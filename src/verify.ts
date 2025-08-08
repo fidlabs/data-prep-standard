@@ -215,9 +215,8 @@ export class Verifier {
         (piece) => piece.piece_cid === pieceCID.toString()
       );
       if (!found) {
-        console.log(pieceCID.toString(), this.#superManifest.pieces);
         throw new Error(
-          `Piece CID (CommP) '${pieceCID.toString()}' does not match any pieces from super manifest`
+          `Piece CID (CommP) '${pieceCID.toString()}' does not match any pieces from super manifest '${JSON.stringify(this.#superManifest.pieces)}'`
         );
       }
     }

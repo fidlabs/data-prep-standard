@@ -83,7 +83,7 @@ describe("testing unpack function", () => {
     });
     expect(files).toBeDefined();
     expect(files).toHaveLength(3);
-    console.log(files);
+
     await expect(
       unpack(
         files.map((f) => join("outdir", f as string)),

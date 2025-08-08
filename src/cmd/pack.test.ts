@@ -51,7 +51,7 @@ describe("testing pack function", () => {
       "outdir/manifest.json",
       "utf-8"
     ) as string;
-    console.log("manifestContent", manifestContent);
+
     expect(JSON.parse(manifestContent)).toEqual(
       expect.objectContaining({
         "@spec":

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "@jest/globals";
 import { CID } from "multiformats";
 
-import { SubManifest, SuperManifest, SuperManifestContentDirectory } from "./manifest.js";
+import { SubManifest, SuperManifest } from "./manifest.js";
 import { VerificationSplitFile } from "./verify.js";
 
 const { Verifier } = await import("./verify.js");
@@ -506,7 +506,7 @@ describe("super manifest verifier", () => {
                   piece_cid:
                     "bafkreic7oc7rriegabybn2kiwbfo2o4cca5dnpvec5k3nto7v4ikzy6g54",
                 },
-              ]
+              ],
             },
           ],
         },
@@ -530,7 +530,7 @@ describe("super manifest verifier", () => {
               cid: "bafybeieplyjzhimptinwi5ufo3hlhum7svpq5r3g5f7jhynolvtvn3w77i",
               original_file_byte_length: 5678,
               original_file_hash: "12345abcdef67890",
-              original_file_name: "file1.txt"
+              original_file_name: "file1.txt",
             },
           ],
         },
@@ -551,7 +551,7 @@ describe("super manifest verifier", () => {
               cid: "bafybeieplyjzhimptinwi5ufo3hlhum7svpq5r3g5f7jhynolvtvn3w77i",
               original_file_byte_length: 5678,
               original_file_hash: "12345abcdef67890",
-              original_file_name: "file1.txt"
+              original_file_name: "file1.txt",
             },
           ],
         },
@@ -596,16 +596,15 @@ describe("super manifest verifier", () => {
       );
     }).not.toThrow();
 
-    const joinedFiles = new Map<string, VerificationSplitFile>;
+    const joinedFiles = new Map<string, VerificationSplitFile>();
     joinedFiles.set("test-dir/file1.txt", {
       hash: "12345abcdef67890",
       byteLength: 5678,
-    })
+    });
 
     expect(() => {
       verifier.verifyPieces(joinedFiles);
     }).not.toThrow();
-
   });
 
   test("split file bad hash", () => {
@@ -659,7 +658,7 @@ describe("super manifest verifier", () => {
                   piece_cid:
                     "bafkreic7oc7rriegabybn2kiwbfo2o4cca5dnpvec5k3nto7v4ikzy6g54",
                 },
-              ]
+              ],
             },
           ],
         },
@@ -683,7 +682,7 @@ describe("super manifest verifier", () => {
               cid: "bafybeieplyjzhimptinwi5ufo3hlhum7svpq5r3g5f7jhynolvtvn3w77i",
               original_file_byte_length: 5678,
               original_file_hash: "12345abcdef67890",
-              original_file_name: "file1.txt"
+              original_file_name: "file1.txt",
             },
           ],
         },
@@ -704,7 +703,7 @@ describe("super manifest verifier", () => {
               cid: "bafybeieplyjzhimptinwi5ufo3hlhum7svpq5r3g5f7jhynolvtvn3w77i",
               original_file_byte_length: 5678,
               original_file_hash: "12345abcdef67890",
-              original_file_name: "file1.txt"
+              original_file_name: "file1.txt",
             },
           ],
         },
@@ -749,15 +748,14 @@ describe("super manifest verifier", () => {
       );
     }).not.toThrow();
 
-    const joinedFiles = new Map<string, VerificationSplitFile>;
+    const joinedFiles = new Map<string, VerificationSplitFile>();
     joinedFiles.set("test-dir/file1.txt", {
       hash: "1234123412341234",
       byteLength: 5678,
-    })
+    });
 
     expect(() => {
       verifier.verifyPieces(joinedFiles);
     }).toThrow();
   });
-
 });

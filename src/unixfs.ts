@@ -197,7 +197,6 @@ export function createDirectoryEncoderStream(
     settings: defaultSettings,
   });
   const close = async (): Promise<void> => {
-    // console.log("closing")
     await rootDir.manifest(unixfsWriter, subManifest);
     await unixfsWriter.close();
   };

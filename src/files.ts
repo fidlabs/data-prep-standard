@@ -89,7 +89,12 @@ export const iterateFilesFromPathsWithSize = async function* (
     if (lite) {
       throw new Error("Splitting files not supported with --lite");
     }
-    console.log("hashing large file for splitting:", file.name, file.size);
+    console.log(
+      "hashing large file for splitting:",
+      file.name,
+      "bytes:",
+      file.size
+    );
 
     let fileSizeRemaining = file.size;
     let offset = 0;

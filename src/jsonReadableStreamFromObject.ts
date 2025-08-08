@@ -112,7 +112,6 @@ function* enqueueObject(
       // don't try and JSONify undefined values, just leave the key out of the JSON object
       continue;
     }
-    // console.log("+");
     yield `${nl}${indentation2}"${String(k)}":${space}`;
     yield* enqueueValue(value, options, level + 1);
     if (i + 1 < keys.length) {

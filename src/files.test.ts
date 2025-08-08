@@ -99,7 +99,7 @@ describe("testing files functions", () => {
       });
     });
 
-    const generator = iterateFilesFromPathsWithSize(["test"], 11);
+    const generator = iterateFilesFromPathsWithSize(["test"], { nBytes: 11 });
 
     const files1 = await generator.next();
     expect(files1.done).toBeFalsy();
@@ -168,7 +168,7 @@ describe("testing files functions", () => {
       return Readable.from("Another file".slice(start, end)) as ReadStream;
     });
 
-    const generator = iterateFilesFromPathsWithSize(["test"], 11);
+    const generator = iterateFilesFromPathsWithSize(["test"], { nBytes: 11 });
 
     const files1 = await generator.next();
     expect(files1.done).toBeFalsy();
@@ -261,7 +261,7 @@ describe("testing files functions", () => {
       return Readable.from(content.slice(start, end)) as ReadStream;
     });
 
-    const generator = iterateFilesFromPathsWithSize(["test"], 1);
+    const generator = iterateFilesFromPathsWithSize(["test"], { nBytes: 1 });
 
     for (let i = 0; i < 10; i++) {
       const files1 = await generator.next();

@@ -51,7 +51,7 @@ describe("testing pack function", () => {
       "outdir/manifest.json",
       "utf-8"
     ) as string;
-    console.log("manifestContent", manifestContent);
+
     expect(JSON.parse(manifestContent)).toEqual(
       expect.objectContaining({
         "@spec":
@@ -100,6 +100,18 @@ describe("testing pack function", () => {
         metadata: "basicUserMetadata.json",
         specVersion: "6.6.6",
         targetCarSize: "31GiB",
+      })
+    ).rejects.toThrow();
+  });
+
+  test("no lite with split files", async () => {
+    await expect(
+      pack(["test"], {
+        output: "outdir",
+        metadata: "basicUserMetadata.json",
+        specVersion: "0.1.0",
+        lite: true,
+        targetCarSize: "4B",
       })
     ).rejects.toThrow();
   });

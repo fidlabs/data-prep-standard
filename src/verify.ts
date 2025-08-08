@@ -24,7 +24,6 @@ export interface VerificationFilePart {
   name: string;
   byteLength: number;
   cid: string;
-  rootCID: string;
   originalFileName: string;
   originalFileHash: string;
   originalFileByteLength: number;
@@ -48,7 +47,6 @@ class PieceVerifier {
   #carFile: string;
   #files: Map<string, VerificationFile>;
   #dirs: Map<string, VerificationDirectory>;
-  #subManifest: SubManifest | undefined;
   #superManifest: SuperManifest | undefined;
 
   constructor(carFile: string, superManifest?: SuperManifest) {
@@ -66,7 +64,7 @@ class PieceVerifier {
     this.#dirs.set(path, null);
   }
 
-  verify(subManifest: SubManifest, rootCID: CID): VerificationFilePart[] {
+  verify(subManifest: SubManifest): VerificationFilePart[] {
     const fileParts: VerificationFilePart[] = [];
 
     if (this.#superManifest) {
@@ -99,6 +97,8 @@ class PieceVerifier {
     }
 
     if (!subManifest.contents) {
+      // This dataset was packed --lite, so we can't verify the contents and we don't
+      // support split files
       return [];
     }
 
@@ -131,6 +131,7 @@ class PieceVerifier {
                 `File '${entry.name}' has CID '${String(actualFile.cid)}' but sub manifest hash is '${String(entry.cid)}'.`
               );
             }
+            // we remove the verified file from the map so we can check for extra files below
             this.#files.delete(join(...path, entry.name));
             break;
 
@@ -146,6 +147,11 @@ class PieceVerifier {
                 `File part '${entry.name}' has size '${String(actualFilePart.byteLength)}' but sub manifest size is '${String(entry.byte_length)}'.`
               );
             }
+            if (actualFilePart.cid !== entry.cid) {
+              throw new Error(
+                `File part '${entry.name}' has CID '${String(actualFilePart.cid)}' but sub manifest hash is '${String(entry.cid)}'.`
+              );
+            }
             fileParts.push({
               name: join(...path, entry.name),
               originalFileName: join(...path, entry.original_file_name),
@@ -153,8 +159,9 @@ class PieceVerifier {
               originalFileByteLength: entry.original_file_byte_length,
               byteLength: entry.byte_length,
               cid: entry.cid,
-              rootCID: rootCID.toString(),
             });
+
+            // we remove the verified file from the map so we can check for extra ones below
             this.#files.delete(join(...path, entry.name));
             break;
 
@@ -166,6 +173,7 @@ class PieceVerifier {
               );
             }
             checkEntries([...path, entry.name], entry.contents);
+            // we remove the verified directory from the map so we can check for extra ones below
             this.#dirs.delete(join(...path, entry.name));
             break;
         }
@@ -174,6 +182,7 @@ class PieceVerifier {
 
     checkEntries([], subManifest.contents);
 
+    // Any remaining files in the map are spurious and unexpected
     if (this.#files.size) {
       throw new Error(
         `Unpacked files that are not in the sub manifest: ${JSON.stringify(this.#files)}`
@@ -183,6 +192,7 @@ class PieceVerifier {
     // we don't include the root directory in the manifest so remove that
     this.#dirs.delete(".");
 
+    // Any remaining directories in the map are spurious and unexpected
     if (this.#dirs.size) {
       throw new Error(
         `Unpacked directories that are not in the sub manifest: ${JSON.stringify(this.#dirs)}`
@@ -202,7 +212,7 @@ export class Verifier {
     this.#pieceCIDs = [];
   }
 
-  newPieceVerifier(file: string, pieceCID: CID) {
+  newPieceVerifier(file: string, payloadCID: CID, pieceCID: CID) {
     if (this.#pieceCIDs.includes(pieceCID)) {
       throw new Error(
         `Piece CID (CommP) '${pieceCID.toString()}' already processed, only provide unique Pieces`
@@ -217,6 +227,11 @@ export class Verifier {
       if (!found) {
         throw new Error(
           `Piece CID (CommP) '${pieceCID.toString()}' does not match any pieces from super manifest '${JSON.stringify(this.#superManifest.pieces)}'`
+        );
+      }
+      if (found.payload_cid !== payloadCID.toString()) {
+        throw new Error(
+          `Payload CID '${payloadCID.toString()}' does not match the piece from super manifest '${JSON.stringify(found)}'`
         );
       }
     }

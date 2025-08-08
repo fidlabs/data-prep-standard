@@ -98,6 +98,7 @@ export default async function unpack(
 
     const pieceVerifier = verifier.newPieceVerifier(
       file,
+      rootCID,
       CID.parse(pieceCid.toString())
     );
     let subManifest: SubManifest | undefined;
@@ -142,7 +143,7 @@ export default async function unpack(
     if (!subManifest) {
       throw new Error(`Sub manifest not found in CAR '${file}'`);
     }
-    fileParts.push(...pieceVerifier.verify(subManifest, rootCID));
+    fileParts.push(...pieceVerifier.verify(subManifest));
   }
 
   // After unpacking all the CARs we then attempt to join all the split files (as they

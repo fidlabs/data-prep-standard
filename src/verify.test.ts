@@ -76,6 +76,7 @@ describe("piece verifier", () => {
     const verifier = new Verifier();
     const pieceVerifier = verifier.newPieceVerifier(
       "path/to/carFile.car",
+      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u"),
       CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
     );
     pieceVerifier.addDirectory("test-dir");
@@ -85,34 +86,26 @@ describe("piece verifier", () => {
       byteLength: 1234,
     });
 
-    expect(() =>
-      pieceVerifier.verify(
-        subManifest,
-        CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
-      )
-    ).not.toThrow();
+    expect(() => pieceVerifier.verify(subManifest)).not.toThrow();
   });
 
   test("missing file", () => {
     const verifier = new Verifier();
     const pieceVerifier = verifier.newPieceVerifier(
       "path/to/carFile.car",
+      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u"),
       CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
     );
     pieceVerifier.addDirectory("test-dir");
 
-    expect(() =>
-      pieceVerifier.verify(
-        subManifest,
-        CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
-      )
-    ).toThrow();
+    expect(() => pieceVerifier.verify(subManifest)).toThrow();
   });
 
   test("extra file", () => {
     const verifier = new Verifier();
     const pieceVerifier = verifier.newPieceVerifier(
       "path/to/carFile.car",
+      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u"),
       CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
     );
     pieceVerifier.addDirectory("test-dir");
@@ -127,18 +120,14 @@ describe("piece verifier", () => {
       byteLength: 5678,
     });
 
-    expect(() =>
-      pieceVerifier.verify(
-        subManifest,
-        CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
-      )
-    ).toThrow();
+    expect(() => pieceVerifier.verify(subManifest)).toThrow();
   });
 
   test("missing dir", () => {
     const verifier = new Verifier();
     const pieceVerifier = verifier.newPieceVerifier(
       "path/to/carFile.car",
+      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u"),
       CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
     );
     pieceVerifier.addFile("test-dir/file1.txt", {
@@ -147,18 +136,14 @@ describe("piece verifier", () => {
       byteLength: 1234,
     });
 
-    expect(() =>
-      pieceVerifier.verify(
-        subManifest,
-        CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
-      )
-    ).toThrow();
+    expect(() => pieceVerifier.verify(subManifest)).toThrow();
   });
 
   test("extra dir", () => {
     const verifier = new Verifier();
     const pieceVerifier = verifier.newPieceVerifier(
       "path/to/carFile.car",
+      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u"),
       CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
     );
     pieceVerifier.addDirectory("test-dir");
@@ -169,18 +154,14 @@ describe("piece verifier", () => {
     });
     pieceVerifier.addDirectory("test-dir2");
 
-    expect(() =>
-      pieceVerifier.verify(
-        subManifest,
-        CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
-      )
-    ).toThrow();
+    expect(() => pieceVerifier.verify(subManifest)).toThrow();
   });
 
   test("bad hash", () => {
     const verifier = new Verifier();
     const pieceVerifier = verifier.newPieceVerifier(
       "path/to/carFile.car",
+      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u"),
       CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
     );
     pieceVerifier.addDirectory("test-dir");
@@ -190,18 +171,14 @@ describe("piece verifier", () => {
       byteLength: 1234,
     });
 
-    expect(() =>
-      pieceVerifier.verify(
-        subManifest,
-        CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
-      )
-    ).toThrow();
+    expect(() => pieceVerifier.verify(subManifest)).toThrow();
   });
 
   test("wrong file CID", () => {
     const verifier = new Verifier();
     const pieceVerifier = verifier.newPieceVerifier(
       "path/to/carFile.car",
+      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u"),
       CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
     );
     pieceVerifier.addDirectory("test-dir");
@@ -211,18 +188,14 @@ describe("piece verifier", () => {
       byteLength: 1234,
     });
 
-    expect(() =>
-      pieceVerifier.verify(
-        subManifest,
-        CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
-      )
-    ).toThrow();
+    expect(() => pieceVerifier.verify(subManifest)).toThrow();
   });
 
   test("wrong byte length", () => {
     const verifier = new Verifier();
     const pieceVerifier = verifier.newPieceVerifier(
       "path/to/carFile.car",
+      CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u"),
       CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
     );
     pieceVerifier.addDirectory("test-dir");
@@ -232,12 +205,7 @@ describe("piece verifier", () => {
       byteLength: 5678,
     });
 
-    expect(() =>
-      pieceVerifier.verify(
-        subManifest,
-        CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
-      )
-    ).toThrow();
+    expect(() => pieceVerifier.verify(subManifest)).toThrow();
   });
 });
 
@@ -311,6 +279,7 @@ describe("super manifest verifier", () => {
     const verifier = new Verifier(manifest);
     const pieceVerifier = verifier.newPieceVerifier(
       "path/to/carFile.car",
+      CID.parse("bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"),
       CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
     );
     pieceVerifier.addDirectory("test-dir");
@@ -321,10 +290,7 @@ describe("super manifest verifier", () => {
     });
 
     expect(() => {
-      pieceVerifier.verify(
-        subManifest,
-        CID.parse("bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi")
-      );
+      pieceVerifier.verify(subManifest);
     }).not.toThrow();
   });
 
@@ -354,6 +320,7 @@ describe("super manifest verifier", () => {
     const verifier = new Verifier(manifest);
     const badPieceVerifier = verifier.newPieceVerifier(
       "path/to/carFile.car",
+      CID.parse("bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"),
       CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
     );
     badPieceVerifier.addDirectory("test-dir");
@@ -364,10 +331,7 @@ describe("super manifest verifier", () => {
     });
 
     expect(() => {
-      badPieceVerifier.verify(
-        badSubManifest,
-        CID.parse("bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi")
-      );
+      badPieceVerifier.verify(badSubManifest);
     }).toThrow();
   });
 
@@ -377,6 +341,7 @@ describe("super manifest verifier", () => {
     expect(() => {
       verifier.newPieceVerifier(
         "path/to/carFile.car",
+        CID.parse("bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"),
         CID.parse("bafkreiec6l7reufq36dxvbapvt6f6mivveqpqqueuknre65ylo2gqadfpa")
       );
     }).toThrow();
@@ -386,6 +351,7 @@ describe("super manifest verifier", () => {
     const verifier = new Verifier(manifest);
     const pieceVerifier = verifier.newPieceVerifier(
       "path/to/carFile.car",
+      CID.parse("bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"),
       CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
     );
     pieceVerifier.addDirectory("test-dir");
@@ -394,14 +360,14 @@ describe("super manifest verifier", () => {
       cid: "bafybeieplyjzhimptinwi5ufo3hlhum7svpq5r3g5f7jhynolvtvn3w77i",
       byteLength: 1234,
     });
-    pieceVerifier.verify(
-      subManifest,
-      CID.parse("bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi")
-    );
+    pieceVerifier.verify(subManifest);
 
     expect(() => {
       verifier.newPieceVerifier(
         "path/to/differente/carFile.car",
+        CID.parse(
+          "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"
+        ),
         CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
       );
     }).not.toThrow();
@@ -437,6 +403,7 @@ describe("super manifest verifier", () => {
     const verifier = new Verifier(twoPieceManifest);
     const pieceVerifier = verifier.newPieceVerifier(
       "path/to/carFile.car",
+      CID.parse("bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"),
       CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
     );
     pieceVerifier.addDirectory("test-dir");
@@ -445,10 +412,7 @@ describe("super manifest verifier", () => {
       cid: "bafybeieplyjzhimptinwi5ufo3hlhum7svpq5r3g5f7jhynolvtvn3w77i",
       byteLength: 1234,
     });
-    pieceVerifier.verify(
-      subManifest,
-      CID.parse("bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi")
-    );
+    pieceVerifier.verify(subManifest);
 
     expect(() => {
       verifier.verifyPieces(new Map<string, VerificationSplitFile>());
@@ -501,7 +465,7 @@ describe("super manifest verifier", () => {
                 },
                 {
                   name: "file1.txt.part.1",
-                  cid: "bafybeidh7dkgpt5u6cgpywlxkimm2wzuc5cerksvovkd5asagdhuottl2i",
+                  cid: "bafkreihfuafktgi2zcs64mijqrgyjjkvqo6savzk2p742qtzf46dnmmdvu",
                   byte_length: 4444,
                   piece_cid:
                     "bafkreic7oc7rriegabybn2kiwbfo2o4cca5dnpvec5k3nto7v4ikzy6g54",
@@ -548,7 +512,7 @@ describe("super manifest verifier", () => {
               "@type": "file-part",
               name: "file1.txt.part.1",
               byte_length: 4444,
-              cid: "bafybeieplyjzhimptinwi5ufo3hlhum7svpq5r3g5f7jhynolvtvn3w77i",
+              cid: "bafkreihfuafktgi2zcs64mijqrgyjjkvqo6savzk2p742qtzf46dnmmdvu",
               original_file_byte_length: 5678,
               original_file_hash: "12345abcdef67890",
               original_file_name: "file1.txt",
@@ -562,6 +526,7 @@ describe("super manifest verifier", () => {
 
     const piece1Verifier = verifier.newPieceVerifier(
       "path/to/carFile.car",
+      CID.parse("bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"),
       CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
     );
     piece1Verifier.addDirectory("test-dir");
@@ -572,14 +537,12 @@ describe("super manifest verifier", () => {
     });
 
     expect(() => {
-      piece1Verifier.verify(
-        subManifest1,
-        CID.parse("bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi")
-      );
+      piece1Verifier.verify(subManifest1);
     }).not.toThrow();
 
     const piece2Verifier = verifier.newPieceVerifier(
       "path/to/another/carFile.car",
+      CID.parse("bafybeicavh5ivvh6iuwaos53ijftaijdoyluhoj7t5n5zo2p6gn5gfown4"),
       CID.parse("bafkreic7oc7rriegabybn2kiwbfo2o4cca5dnpvec5k3nto7v4ikzy6g54")
     );
     piece2Verifier.addDirectory("test-dir");
@@ -590,10 +553,7 @@ describe("super manifest verifier", () => {
     });
 
     expect(() => {
-      piece2Verifier.verify(
-        subManifest2,
-        CID.parse("bafybeidh7dkgpt5u6cgpywlxkimm2wzuc5cerksvovkd5asagdhuottl2i")
-      );
+      piece2Verifier.verify(subManifest2);
     }).not.toThrow();
 
     const joinedFiles = new Map<string, VerificationSplitFile>();
@@ -653,7 +613,7 @@ describe("super manifest verifier", () => {
                 },
                 {
                   name: "file1.txt.part.1",
-                  cid: "bafybeidh7dkgpt5u6cgpywlxkimm2wzuc5cerksvovkd5asagdhuottl2i",
+                  cid: "bafkreihfuafktgi2zcs64mijqrgyjjkvqo6savzk2p742qtzf46dnmmdvu",
                   byte_length: 4444,
                   piece_cid:
                     "bafkreic7oc7rriegabybn2kiwbfo2o4cca5dnpvec5k3nto7v4ikzy6g54",
@@ -700,7 +660,7 @@ describe("super manifest verifier", () => {
               "@type": "file-part",
               name: "file1.txt.part.1",
               byte_length: 4444,
-              cid: "bafybeieplyjzhimptinwi5ufo3hlhum7svpq5r3g5f7jhynolvtvn3w77i",
+              cid: "bafkreihfuafktgi2zcs64mijqrgyjjkvqo6savzk2p742qtzf46dnmmdvu",
               original_file_byte_length: 5678,
               original_file_hash: "12345abcdef67890",
               original_file_name: "file1.txt",
@@ -714,6 +674,7 @@ describe("super manifest verifier", () => {
 
     const piece1Verifier = verifier.newPieceVerifier(
       "path/to/carFile.car",
+      CID.parse("bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"),
       CID.parse("bafkreifdv72xnekom4eslppkyvcaazmcs5llvm7kzhx7po45iuqprjiv6u")
     );
     piece1Verifier.addDirectory("test-dir");
@@ -724,14 +685,12 @@ describe("super manifest verifier", () => {
     });
 
     expect(() => {
-      piece1Verifier.verify(
-        subManifest1,
-        CID.parse("bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi")
-      );
+      piece1Verifier.verify(subManifest1);
     }).not.toThrow();
 
     const piece2Verifier = verifier.newPieceVerifier(
       "path/to/another/carFile.car",
+      CID.parse("bafybeicavh5ivvh6iuwaos53ijftaijdoyluhoj7t5n5zo2p6gn5gfown4"),
       CID.parse("bafkreic7oc7rriegabybn2kiwbfo2o4cca5dnpvec5k3nto7v4ikzy6g54")
     );
     piece2Verifier.addDirectory("test-dir");
@@ -742,10 +701,7 @@ describe("super manifest verifier", () => {
     });
 
     expect(() => {
-      piece2Verifier.verify(
-        subManifest2,
-        CID.parse("bafybeidh7dkgpt5u6cgpywlxkimm2wzuc5cerksvovkd5asagdhuottl2i")
-      );
+      piece2Verifier.verify(subManifest2);
     }).not.toThrow();
 
     const joinedFiles = new Map<string, VerificationSplitFile>();

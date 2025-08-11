@@ -9,7 +9,12 @@ describe("CLI", function () {
   });
 
   test("ls succeeds", () => {
-    expect(() => execaSync(binPath, ["ls", "path/to/car"])).not.toThrow();
+    expect(() =>
+      execaSync(binPath, [
+        "ls",
+        "testing/inputs/packs/basic/piece-bafybeie7poazgv7xo4ec7zg6twnuec6qinb3jwqmv6tgu3gbb6olbhlh6q.car",
+      ])
+    ).not.toThrow();
   });
 
   test("pack succeeds", () => {

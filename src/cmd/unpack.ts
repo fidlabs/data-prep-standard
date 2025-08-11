@@ -9,6 +9,7 @@ import { pipeline } from "node:stream/promises";
 import { createCommPStream } from "@filoz/synapse-sdk/commp";
 import { CarIndexedReader, RawLocation } from "@ipld/car/indexed-reader";
 import { CarIndexer } from "@ipld/car/indexer";
+import { validateBlock } from "@web3-storage/car-block-validator"
 import { createParseStream } from "big-json";
 import { recursive as exporter } from "ipfs-unixfs-exporter";
 import { CID } from "multiformats/cid";
@@ -85,11 +86,11 @@ export default async function unpack(
         if (!block) {
           throw new Error(`Missing block: ${cid.toString()}`);
         }
+        await validateBlock(block)
 
         return block.bytes;
       },
     });
-    await reader.close();
 
     const pieceCid = getCommP();
     if (!pieceCid) {

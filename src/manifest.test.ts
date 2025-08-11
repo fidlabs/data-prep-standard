@@ -80,7 +80,7 @@ describe("super manifest", () => {
     expect(subManifest.project_url).toBe("https://example.com");
     expect(subManifest.open_with).toBe("test-app");
     expect(subManifest.tags).toEqual(["test", "manifest"]);
-    expect(subManifest.uuid).toEqual(expect.any(String));
+    expect(subManifest.uuid).toEqual(manifest.uuid);
   });
 
   test("piece with contents", () => {

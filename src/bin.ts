@@ -69,7 +69,7 @@ cli
   .argument("<CAR>")
   .summary("List files and directories from a CAR.")
   .description("List files and directories from a CAR.")
-  .option("-r, --root", "Root CID to list files from.")
+  .option("-r, --root <CID>", "Root CID to list files from.")
   .option("--verbose", "Print file CIDs and byte sizes.")
   .action(createAction("./cmd/ls.js"));
 

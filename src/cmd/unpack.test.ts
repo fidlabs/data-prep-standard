@@ -89,7 +89,7 @@ describe("testing unpack function", () => {
         files.map((f) => join("outdir", f as string)),
         {
           output: "testing/outputs/unpack",
-          verbose: false,
+          verbose: true,
         }
       )
     ).resolves.not.toThrow();

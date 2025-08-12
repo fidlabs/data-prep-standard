@@ -1,4 +1,5 @@
 import { CarIndexedReader } from "@ipld/car/indexed-reader";
+import { read } from "fs";
 import { recursive as exporter } from "ipfs-unixfs-exporter";
 
 export default async function ls(
@@ -39,4 +40,5 @@ export default async function ls(
       }
     }
   }
+  await reader.close();
 }

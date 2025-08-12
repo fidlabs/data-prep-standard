@@ -1,25 +1,22 @@
-/* eslint-disable n/no-unsupported-features/node-builtins */
 import { createHash } from "node:crypto";
-import { createReadStream, createWriteStream, readFileSync } from "node:fs";
+import {
+  createReadStream,
+  createWriteStream,
+  readFileSync,
+  WriteStream,
+} from "node:fs";
 import { mkdir, unlink } from "node:fs/promises";
-import { join, sep } from "node:path";
-import { Readable, Transform } from "node:stream";
+import { join } from "node:path";
+import { Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 
-import { createCommPStream } from "@filoz/synapse-sdk/commp";
-import { CarIndexedReader, RawLocation } from "@ipld/car/indexed-reader";
-import { CarIndexer } from "@ipld/car/indexer";
-import { validateBlock } from "@web3-storage/car-block-validator";
-import { createParseStream } from "big-json";
-import { recursive as exporter } from "ipfs-unixfs-exporter";
-import { CID } from "multiformats/cid";
-
-import { SubManifest, SuperManifest } from "../manifest.js";
+import { SuperManifest } from "../manifest.js";
 import {
   VerificationFilePart,
   VerificationSplitFile,
   Verifier,
-} from "../verify.js";
+} from "../verifier.js";
+import verify from "../verify.js";
 
 export default async function unpack(
   files: string[],
@@ -29,9 +26,9 @@ export default async function unpack(
     verbose: boolean;
   }
 ): Promise<void> {
-  let superManifest: SuperManifest | undefined;
-
   console.log("unpack", files, opts);
+
+  let superManifest: SuperManifest | undefined;
 
   if (opts.superManifest) {
     // We have been provided with a super manifest, so load it and use it to
@@ -47,105 +44,20 @@ export default async function unpack(
     }
   }
   const verifier = new Verifier(superManifest);
-  const fileParts: VerificationFilePart[] = [];
 
-  for (const file of files) {
-    console.log("unpack", file);
-
-    const { stream: commPTransform, getCommP } = createCommPStream();
-
-    const stream = Readable.toWeb(createReadStream(file)).pipeThrough(
-      commPTransform
-    );
-
-    const indexer = await CarIndexer.fromIterable(Readable.fromWeb(stream));
-    const index = new Map<string, RawLocation>();
-    const order = [];
-    for await (const { cid, blockLength, blockOffset } of indexer) {
-      const cidStr = cid.toString();
-      index.set(cidStr, { blockLength, blockOffset });
-      order.push(cidStr);
+  const newFileStream = (path: string): WriteStream => {
+    const outPath = join(opts.output, path);
+    if (opts.verbose) {
+      console.log(outPath);
     }
-    const roots = await indexer.getRoots();
-    const reader = new CarIndexedReader(
-      indexer.version,
-      file,
-      roots,
-      index,
-      order
-    );
+    return createWriteStream(outPath);
+  };
 
-    const [rootCID] = roots;
-    if (!rootCID) {
-      throw new Error(`No root CID found in CAR: ${file}`);
-    }
+  const createDir = async (path: string): Promise<void> => {
+    await mkdir(join(opts.output, path), { recursive: true });
+  };
 
-    const entries = exporter(rootCID, {
-      async get(cid) {
-        const block = await reader.get(cid);
-        if (!block) {
-          throw new Error(`Missing block: ${cid.toString()}`);
-        }
-        await validateBlock(block);
-
-        return block.bytes;
-      },
-    });
-
-    const pieceCid = getCommP();
-    if (!pieceCid) {
-      throw new Error("Failed to get CommP from stream");
-    }
-
-    const pieceVerifier = verifier.newPieceVerifier(
-      file,
-      rootCID,
-      CID.parse(pieceCid.toString())
-    );
-    let subManifest: SubManifest | undefined;
-
-    for await (const entry of entries) {
-      const filePath = join(...entry.path.split(sep).slice(1));
-      const outPath = join(opts.output, filePath);
-
-      if (entry.type === "file" || entry.type === "raw") {
-        if (filePath === "manifest.json") {
-          console.log("Sub manifest found");
-          await pipeline(
-            entry.content(),
-            createParseStream().on("data", (data) => {
-              subManifest = data as SubManifest;
-            })
-          );
-          // We don't save the sub manifest to disk so the data is the same as
-          // when it was packed
-          continue;
-        }
-        if (opts.verbose) {
-          console.log(filePath);
-        }
-        const hasher = createHash("sha256");
-
-        await pipeline(entry.content(), hasher, createWriteStream(outPath));
-        pieceVerifier.addFile(filePath, {
-          hash: hasher.digest("hex"),
-          byteLength: Number(entry.size),
-          cid: entry.cid.toString(),
-        });
-      } else if (entry.type === "directory") {
-        await mkdir(outPath, { recursive: true });
-        pieceVerifier.addDirectory(filePath);
-      } else {
-        throw new Error(
-          `Unsupported UnixFS type ${entry.type} for path: ${filePath}`
-        );
-      }
-    }
-    if (!subManifest) {
-      throw new Error(`Sub manifest not found in CAR '${file}'`);
-    }
-    fileParts.push(...pieceVerifier.verify(subManifest));
-  }
+  const fileParts = await verify(files, verifier, newFileStream, createDir);
 
   // After unpacking all the CARs we then attempt to join all the split files (as they
   // could have been split between any of the supplied CARs)
@@ -177,6 +89,8 @@ export default async function unpack(
       "from",
       parts.map((p) => p.name)
     );
+    let originalHash: string | undefined;
+    let originalByteLength: number | undefined;
     const stream = async (
       path: string,
       parts: VerificationFilePart[]
@@ -186,8 +100,24 @@ export default async function unpack(
       for (const filePart of parts.sort((a, b) =>
         a.name.localeCompare(b.name)
       )) {
+        originalHash ??= filePart.originalFileHash;
+        if (originalHash !== filePart.originalFileHash) {
+          throw new Error(
+            `File part '${filePart.name}' has a different original hash from another part: ${originalHash} vs ${filePart.originalFileHash}`
+          );
+        }
+        originalByteLength ??= filePart.originalFileByteLength;
+        if (originalByteLength !== filePart.originalFileByteLength) {
+          throw new Error(
+            `File part '${filePart.name}' has a different original byte length from another part: ${String(originalByteLength)} vs ${String(filePart.originalFileByteLength)}`
+          );
+        }
+
+        console.log("adding", filePart.name, filePart.byteLength, "to", path);
+        const readStream = createReadStream(join(opts.output, filePart.name));
+
         await pipeline(
-          createReadStream(join(opts.output, filePart.name)),
+          readStream,
           new Transform({
             transform(chunk: Uint8Array, _encoding, callback) {
               hasher.update(chunk);
@@ -200,11 +130,22 @@ export default async function unpack(
         );
         await unlink(join(opts.output, filePart.name));
       }
+      const hash = hasher.digest("hex");
       writeStream.close();
       joinedFiles.set(path, {
-        hash: hasher.digest("hex"),
+        hash,
         byteLength: writeStream.bytesWritten,
       });
+      if (writeStream.bytesWritten !== originalByteLength) {
+        throw new Error(
+          `Joined file '${path}' has byte length '${String(writeStream.bytesWritten)}' but expected '${String(originalByteLength)}'.  Have you provided all the CARs for this dataset?`
+        );
+      }
+      if (hash !== originalHash) {
+        throw new Error(
+          `Joined file '${path}' has hash '${hash}' but expected '${originalHash ?? "unknown"}'.`
+        );
+      }
     };
     promises.push(stream(path, parts));
   }

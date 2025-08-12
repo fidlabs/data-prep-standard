@@ -140,6 +140,4 @@ export default async function pack(
       })
     ) as WritableStream<Buffer>
   );
-
-  console.log(process.getActiveResourcesInfo(), process._getActiveHandlesInfo);
 }

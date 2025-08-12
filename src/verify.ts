@@ -94,11 +94,14 @@ export default async function verify(
           continue;
         }
         const hasher = createHash("sha256");
-        const writeStream = outStreamFactory ? outStreamFactory(filePath) : new Writable({
-          write: (_chunk, _encoding, callback) => {
-            callback();
-          },
-        });
+        const writeStream =
+          outStreamFactory ?
+            outStreamFactory(filePath)
+          : new Writable({
+              write: (_chunk, _encoding, callback) => {
+                callback();
+              },
+            });
         await pipeline(
           entry.content(),
           new Transform({

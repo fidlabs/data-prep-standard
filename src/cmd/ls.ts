@@ -39,4 +39,5 @@ export default async function ls(
       }
     }
   }
+  await reader.close();
 }

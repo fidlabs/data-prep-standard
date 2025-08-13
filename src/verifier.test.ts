@@ -2,9 +2,9 @@ import { describe, expect, test } from "@jest/globals";
 import { CID } from "multiformats";
 
 import { SubManifest, SuperManifest } from "./manifest.js";
-import { VerificationSplitFile } from "./verify.js";
+import { VerificationSplitFile } from "./verifier.js";
 
-const { Verifier } = await import("./verify.js");
+const { Verifier } = await import("./verifier.js");
 
 describe("piece verifier", () => {
   let manifest: SuperManifest;

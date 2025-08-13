@@ -95,6 +95,109 @@ describe("testing pack function", () => {
     );
   });
 
+  test("multiple files", async () => {
+    vol.mkdirSync(join(cwd(), "common", "part", "uncommon", "test1"), {
+      recursive: true,
+    });
+    vol.mkdirSync(join(cwd(), "common", "part", "differing", "test2"), {
+      recursive: true,
+    });
+    fs.writeFileSync(
+      join(cwd(), "common", "part", "uncommon", "test1", "file1.txt"),
+      "Hello World"
+    );
+    fs.writeFileSync(
+      join(cwd(), "common", "part", "differing", "test2", "file2.txt"),
+      "Another file"
+    );
+
+    await expect(
+      pack(
+        [
+          join("common", "part", "uncommon", "test1"),
+          join("common", "part", "differing", "test2"),
+        ],
+        {
+          output: "outdir",
+          metadata: "basicUserMetadata.json",
+          specVersion: "0.1.0",
+          targetCarSize: "31GiB",
+        }
+      )
+    ).resolves.not.toThrow();
+
+    const manifestContent = fs.readFileSync(
+      "outdir/manifest.json",
+      "utf-8"
+    ) as string;
+
+    expect(JSON.parse(manifestContent)).toEqual(
+      expect.objectContaining({
+        "@spec":
+          "https://raw.githubusercontent.com/fidlabs/data-prep-standard/refs/heads/main/specification/v0/FilecoinDataPreparationManifestSpecification.md",
+        "@spec_version": "0.1.0",
+        uuid: expect.any(String),
+        name: "test",
+        description: "test desc",
+        version: "2025/04/16",
+        license: "MIT",
+        project_url: "https://test.org",
+        open_with: "browser",
+        n_pieces: 1,
+        pieces: expect.arrayContaining([
+          expect.objectContaining({
+            piece_cid: expect.any(String),
+            payload_cid: expect.any(String),
+          }),
+        ]),
+        contents: expect.arrayContaining([
+          expect.objectContaining({
+            "@type": "directory",
+            name: "uncommon",
+            contents: expect.arrayContaining([
+              expect.objectContaining({
+                "@type": "directory",
+                name: "test1",
+                contents: expect.arrayContaining([
+                  expect.objectContaining({
+                    "@type": "file",
+                    name: "file1.txt",
+                    byte_length: 11,
+                    hash: expect.any(String),
+                    cid: expect.any(String),
+                    piece_cid: expect.any(String),
+                    media_type: "text/plain",
+                  }),
+                ]),
+              }),
+            ]),
+          }),
+          expect.objectContaining({
+            "@type": "directory",
+            name: "differing",
+            contents: expect.arrayContaining([
+              expect.objectContaining({
+                "@type": "directory",
+                name: "test2",
+                contents: expect.arrayContaining([
+                  expect.objectContaining({
+                    "@type": "file",
+                    name: "file2.txt",
+                    byte_length: 12,
+                    hash: expect.any(String),
+                    cid: expect.any(String),
+                    piece_cid: expect.any(String),
+                    media_type: "text/plain",
+                  }),
+                ]),
+              }),
+            ]),
+          }),
+        ]),
+      })
+    );
+  });
+
   test("bad spec version", async () => {
     await expect(
       pack(["test"], {

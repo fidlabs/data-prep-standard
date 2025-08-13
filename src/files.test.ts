@@ -316,4 +316,220 @@ describe("testing files functions", () => {
     expect(files3.done).toBeTruthy();
     expect(files3.value).toBeUndefined();
   });
+
+  test("multiple inputs", async () => {
+    mocked_filesFromPaths.mockImplementationOnce(async (paths) => {
+      expect(paths).toEqual(
+        expect.arrayContaining(["common/test1", "common/test2"])
+      );
+      return new Promise((resolve) => {
+        resolve([
+          {
+            name: "test1/file1.txt",
+            stream: () => Readable.toWeb(Readable.from("Hello World")),
+            size: 10,
+          },
+          {
+            name: "test2/file2.txt",
+            stream: () => Readable.toWeb(Readable.from("Another file")),
+            size: 12,
+          },
+        ]);
+      });
+    });
+
+    const generator = iterateFilesFromPathsWithSize([
+      "common/test1",
+      "common/test2",
+    ]);
+
+    const files1 = await generator.next();
+    expect(files1.done).toBeFalsy();
+    expect(files1.value).toBeDefined();
+
+    if (files1.value) {
+      expect(files1.value).toHaveLength(2);
+      expect(files1.value[0]).toEqual(
+        expect.objectContaining({
+          name: "test1/file1.txt",
+          size: 10,
+          stream: expect.any(Function),
+          media_type: "text/plain",
+        })
+      );
+      if (files1.value[0]) {
+        expect(await text(files1.value[0].stream())).toBe("Hello World");
+      }
+      expect(files1.value[1]).toEqual(
+        expect.objectContaining({
+          name: "test2/file2.txt",
+          size: 12,
+          stream: expect.any(Function),
+          media_type: "text/plain",
+        })
+      );
+      if (files1.value[1]) {
+        expect(await text(files1.value[1].stream())).toBe("Another file");
+      }
+    }
+
+    const files2 = await generator.next();
+    expect(files2.done).toBeTruthy();
+    expect(files2.value).toBeUndefined();
+  });
+
+  test("multiple deep inputs", async () => {
+    mocked_filesFromPaths.mockImplementationOnce(async (paths) => {
+      expect(paths).toEqual(
+        expect.arrayContaining([
+          "common/part/uncommon/test1",
+          "common/part/differing/test2",
+        ])
+      );
+      return new Promise((resolve) => {
+        resolve([
+          {
+            name: "uncommon/test1/file1.txt",
+            stream: () => Readable.toWeb(Readable.from("Hello World")),
+            size: 10,
+          },
+          {
+            name: "differing/test2/file2.txt",
+            stream: () => Readable.toWeb(Readable.from("Another file")),
+            size: 12,
+          },
+        ]);
+      });
+    });
+
+    const generator = iterateFilesFromPathsWithSize([
+      "common/part/uncommon/test1",
+      "common/part/differing/test2",
+    ]);
+
+    const files1 = await generator.next();
+    expect(files1.done).toBeFalsy();
+    expect(files1.value).toBeDefined();
+
+    if (files1.value) {
+      expect(files1.value).toHaveLength(2);
+      expect(files1.value[0]).toEqual(
+        expect.objectContaining({
+          name: "uncommon/test1/file1.txt",
+          size: 10,
+          stream: expect.any(Function),
+          media_type: "text/plain",
+        })
+      );
+      if (files1.value[0]) {
+        expect(await text(files1.value[0].stream())).toBe("Hello World");
+      }
+      expect(files1.value[1]).toEqual(
+        expect.objectContaining({
+          name: "differing/test2/file2.txt",
+          size: 12,
+          stream: expect.any(Function),
+          media_type: "text/plain",
+        })
+      );
+      if (files1.value[1]) {
+        expect(await text(files1.value[1].stream())).toBe("Another file");
+      }
+    }
+
+    const files2 = await generator.next();
+    expect(files2.done).toBeTruthy();
+    expect(files2.value).toBeUndefined();
+  });
+
+  test("split files multiple input", async () => {
+    mocked_filesFromPaths.mockImplementationOnce(async (paths) => {
+      expect(paths).toEqual(expect.arrayContaining(["test1", "test2"]));
+      return new Promise((resolve) => {
+        resolve([
+          {
+            name: "test1/file1.txt",
+            stream: () => Readable.toWeb(Readable.from("Hello World")),
+            size: 10,
+          },
+          {
+            name: "test2/file2.txt",
+            stream: () => Readable.toWeb(Readable.from("Another file")),
+            size: 12,
+          },
+        ]);
+      });
+    });
+    mocked_createReadStream.mockImplementation((_name, options) => {
+      const start = (options as undefined | { start?: number })?.start ?? 0;
+      const end = ((options as undefined | { end?: number })?.end ?? 0) + 1;
+      // end + 1 because the end is inclusive in the createReadStream options
+      // and exclusive in the slice method
+      return Readable.from("Another file".slice(start, end)) as ReadStream;
+    });
+
+    const generator = iterateFilesFromPathsWithSize(["test1", "test2"], {
+      nBytes: 11,
+    });
+
+    const files1 = await generator.next();
+    expect(files1.done).toBeFalsy();
+    expect(files1.value).toBeDefined();
+
+    if (files1.value) {
+      expect(files1.value).toHaveLength(2);
+      expect(files1.value[0]).toEqual(
+        expect.objectContaining({
+          name: "test1/file1.txt",
+          size: 10,
+          stream: expect.any(Function),
+        })
+      );
+      if (files1.value[0]) {
+        expect(await text(files1.value[0].stream())).toBe("Hello World");
+      }
+      expect(files1.value[1]).toEqual(
+        expect.objectContaining({
+          name: "test2/file2.txt.part.0",
+          originalInfo: {
+            name: "test2/file2.txt",
+            size: 12,
+            hash: expect.any(String),
+          },
+          size: 1,
+          stream: expect.any(Function),
+        })
+      );
+      if (files1.value[1]) {
+        expect(await text(files1.value[1].stream())).toBe("A");
+      }
+    }
+
+    const files2 = await generator.next();
+    expect(files2.done).toBeFalsy();
+    expect(files2.value).toBeDefined();
+
+    if (files2.value) {
+      expect(files2.value).toHaveLength(1);
+      expect(files2.value[0]).toEqual(
+        expect.objectContaining({
+          name: "test2/file2.txt.part.1",
+          originalInfo: {
+            name: "test2/file2.txt",
+            size: 12,
+            hash: expect.any(String),
+          },
+          size: 11,
+          stream: expect.any(Function),
+        })
+      );
+      if (files2.value[0]) {
+        expect(await text(files2.value[0].stream())).toBe("nother file");
+      }
+    }
+
+    const files3 = await generator.next();
+    expect(files3.done).toBeTruthy();
+    expect(files3.value).toBeUndefined();
+  });
 });

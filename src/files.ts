@@ -8,6 +8,7 @@ import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 
 import { FileLike, filesFromPaths } from "files-from-path";
+import mime from "mime";
 
 interface originalInfo {
   name: string;
@@ -73,8 +74,7 @@ export const iterateFilesFromPathsWithSize = async function* (
 
       const splitFile: SplitFileLike = {
         ...file,
-        // TODO: media_type: need to get the full path to the file in a sensible way
-        // media_type: mime.getType(file.name)
+        media_type: mime.getType(join(filePaths[0] ?? "", file.name)) ?? undefined
       };
       files.push(splitFile);
       bytes += file.size;

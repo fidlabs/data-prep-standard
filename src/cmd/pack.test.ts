@@ -79,6 +79,7 @@ describe("testing pack function", () => {
             hash: expect.any(String),
             cid: expect.any(String),
             piece_cid: expect.any(String),
+            media_type: "text/plain",
           }),
           expect.objectContaining({
             "@type": "file",
@@ -87,6 +88,7 @@ describe("testing pack function", () => {
             hash: expect.any(String),
             cid: expect.any(String),
             piece_cid: expect.any(String),
+            media_type: "text/plain",
           }),
         ]),
       })

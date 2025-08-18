@@ -38,7 +38,7 @@
     "dist"
   ],
   "dependencies": {
-    "@filoz/synapse-sdk": "^0.23.0",
+    "@filoz/synapse-sdk": "^0.23.2",
     "@ipld/car": "^5.4.2",
     "@ipld/unixfs": "^3.0.0",
     "@web3-storage/car-block-validator": "^1.2.2",

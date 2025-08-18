@@ -48,7 +48,7 @@
     "ipfs-car": "^3.0.0",
     "ipfs-unixfs-exporter": "^13.7.2",
     "mime": "^4.0.7",
-    "multiformats": "^13.3.7"
+    "multiformats": "^13.4.0"
   },
   "devDependencies": {
     "@jest/globals": "^29.0.2",

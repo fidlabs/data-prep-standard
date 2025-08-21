@@ -3,11 +3,12 @@ import assert from "node:assert";
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
 import { readdir, stat } from "node:fs/promises";
-import { join } from "node:path";
+import { join, sep } from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 
 import { FileLike, filesFromPaths } from "files-from-path";
+import mime from "mime";
 
 interface originalInfo {
   name: string;
@@ -47,6 +48,22 @@ export const iterateFilesFromPathsWithSize = async function* (
   const allFiles = await filesFromPaths(filePaths, {
     fs: { createReadStream, promises: { readdir, stat } },
   });
+  let commonPathParts: string[] | undefined;
+
+  for (const p of filePaths) {
+    const nameParts = p.split(sep);
+    if (!commonPathParts) {
+      commonPathParts = nameParts;
+      continue;
+    }
+    for (let i = 0; i < commonPathParts.length; i++) {
+      if (commonPathParts[i] !== nameParts[i]) {
+        commonPathParts = commonPathParts.slice(0, i);
+        break;
+      }
+    }
+  }
+
   let bytes = 0;
   const files: SplitFileLike[] = [];
   const nBytes = opts?.nBytes ?? 31 * 1024 * 1024 * 1024;
@@ -73,8 +90,11 @@ export const iterateFilesFromPathsWithSize = async function* (
 
       const splitFile: SplitFileLike = {
         ...file,
-        // TODO: media_type: need to get the full path to the file in a sensible way
-        // media_type: mime.getType(file.name)
+        // The mime package only considers the file extension, in future we might
+        // want to use the file contents to determine the media type.
+        media_type:
+          mime.getType(join(...(commonPathParts ?? []), file.name)) ??
+          undefined,
       };
       files.push(splitFile);
       bytes += file.size;
@@ -126,7 +146,11 @@ export const iterateFilesFromPathsWithSize = async function* (
         size: size,
         stream: (function (path, start, end) {
           return () => Readable.toWeb(createReadStream(path, { start, end }));
-        })(join(filePaths[0] ?? "", file.name), offset, offset + size - 1),
+        })(
+          join(...(commonPathParts ?? []), file.name),
+          offset,
+          offset + size - 1
+        ),
         originalInfo: {
           name: file.name,
           hash,

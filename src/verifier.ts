@@ -123,12 +123,12 @@ class PieceVerifier {
             }
             if (actualFile.hash !== entry.hash) {
               throw new Error(
-                `File '${entry.name}' has hash '${String(actualFile.hash)}' but sub manifest hash is '${String(entry.hash)}'.`
+                `File '${entry.name}' has hash '${actualFile.hash}' but sub manifest hash is '${entry.hash}'.`
               );
             }
             if (actualFile.cid !== entry.cid) {
               throw new Error(
-                `File '${entry.name}' has CID '${String(actualFile.cid)}' but sub manifest hash is '${String(entry.cid)}'.`
+                `File '${entry.name}' has CID '${actualFile.cid}' but sub manifest hash is '${entry.cid}'.`
               );
             }
             // we remove the verified file from the map so we can check for extra files below
@@ -149,7 +149,7 @@ class PieceVerifier {
             }
             if (actualFilePart.cid !== entry.cid) {
               throw new Error(
-                `File part '${entry.name}' has CID '${String(actualFilePart.cid)}' but sub manifest hash is '${String(entry.cid)}'.`
+                `File part '${entry.name}' has CID '${actualFilePart.cid}' but sub manifest hash is '${entry.cid}'.`
               );
             }
             fileParts.push({
@@ -274,7 +274,7 @@ export class Verifier {
               }
               if (actualFile.hash !== entry.hash) {
                 throw new Error(
-                  `File '${entry.name}' has hash '${String(actualFile.hash)}' but super manifest hash is '${String(entry.hash)}'.`
+                  `File '${entry.name}' has hash '${actualFile.hash}' but super manifest hash is '${entry.hash}'.`
                 );
               }
               splitFiles.delete(join(...path, entry.name));

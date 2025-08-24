@@ -46,7 +46,7 @@
     "commander": "^14.0.0",
     "files-from-path": "^1.1.4",
     "ipfs-car": "^3.0.0",
-    "ipfs-unixfs-exporter": "^13.7.2",
+    "ipfs-unixfs-exporter": "^13.7.3",
     "mime": "^4.0.7",
     "multiformats": "^13.4.0"
   },

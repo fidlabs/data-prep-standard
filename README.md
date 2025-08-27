@@ -1,7 +1,8 @@
 # data-prep-standard
 
-This repository contains a specification for an extensible and interoperable manifest format for datasets stored on Filecoin
-and a command line tool for creating and verifying prepared data from / to unix file system.
+This repository contains a specification for an extensible and interoperable manifest
+format for datasets stored on Filecoin and a command line tool for creating and
+verifying prepared data from / to unix file system.
 
 ## Introduction
 
@@ -21,9 +22,9 @@ parties - to identify, download and use the data set once stored on Filecoin.
 
 ## Filecoin data preparation
 
-This project sticks with tradiitonal Filecoin canconical form - ie CAR files with UnixFS.
+This project sticks with traditional Filecoin canonical form - ie CAR files with UnixFS.
 
-Files larger than a 32GB are recored in the mainfest as a single content-addressable file
+Files larger than a 32GB are recorded in the manifest as a single content-addressable file
 but will be packed and stored across multiple Pieces and Sectors. The manifest points to
 all the parts of the file in such cases.
 
@@ -42,7 +43,81 @@ enables range queries should they be wanted.
 
 ## Manifest specification
 
-The specification is defined [here](./specification/README.md)
+The specification and all its versions are defined [here](./specification/README.md)
+
+## Building and installing the reference tools
+
+### Requirements
+
+Runs on major Linux flavors and Mac. Support for Windows and WSL2 is not guaranteed.
+
+Requires node versions 18, 20 or 22
+
+### Build and install
+
+Install dependencies and build the tools:
+`npm install`
+`npm run build`
+
+Optionally test the build succeeded:
+`npm run test:system`
+
+Install for local use:
+`npm install -g .`
+
+### Running the tooling
+
+Full usage message is displayed with `--help`:
+
+`filecoin-prep --help`
+
+```bash
+Usage: filecoin-prep [options] [command]
+
+Options:
+  -V, --version              output the version number
+  -h, --help                 display help for command
+
+Commands:
+  pack [options] <files...>  Pack files into one or more Content Addressable aRchives (CARs) with manifests.
+  unpack [options] <CAR...>  Unpack files and directories from a [set of] CAR[s].
+  ls [options] <CAR>         List files and directories from a CAR.
+  verify [options] <CAR...>  Verify CAR contents from manifests.
+  help [command]             display help for command
+```
+
+#### Preparing data
+
+To prepare and pack data you will require a metadata file including basic information about the data set:
+
+```json
+{
+    "name": "The Uncensored Library",
+    "description": "Minecraft map from Journalists Without Borders containing important news that needs to be preserved.",
+    "version": "2025/08/11",
+    "license": "MIT",
+    "project_url": "https://www.uncensoredlibrary.com/en",
+    "open_with": "Minecraft Server"
+}
+```
+
+To pack the contents of a directory into CARs with a manifest:
+
+`filecoin-prep pack -m [metadata_file] -o [output_dir] [files...]`
+
+To view advanced options for `pack`:
+
+`filecoin-prep pack --help`
+
+#### Unpacking prepared data
+
+To unpack a downloaded piece:
+
+`filecoin-prep unpack [car...]`
+
+To view advanced options for `unpack`:
+
+`filecoin-prep unpack --help`
 
 ## Contributing
 

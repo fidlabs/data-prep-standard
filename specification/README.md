@@ -2,11 +2,7 @@
 
 ## Introduction
 
-[!TODO]
-Add simple motivation and intended use statement: public open datasets initially.
-
-[!TODO]
-Add overview diagram showing the 2 manifests and the main actors
+This directory contains the formal specification for all released versions of the Data Preparation Manifest Specification.
 
 The current version of the specification is [0.1.0](./v0/FilecoinDataPreparationManifestSpecification.md)
 

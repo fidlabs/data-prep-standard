@@ -13,7 +13,7 @@ describe("piece verifier", () => {
   beforeAll(() => {
     manifest = {
       "@spec": "spec link",
-      "@spec_version": "0.1.0",
+      "@spec_version": "1.0.0",
       name: "Test Manifest",
       description: "This is a test manifest",
       version: "1.0.0",
@@ -216,7 +216,7 @@ describe("super manifest verifier", () => {
   beforeAll(() => {
     manifest = {
       "@spec": "spec link",
-      "@spec_version": "0.1.0",
+      "@spec_version": "1.0.0",
       name: "Test Manifest",
       description: "This is a test manifest",
       version: "1.0.0",
@@ -378,7 +378,7 @@ describe("super manifest verifier", () => {
   test("not enough pieces", () => {
     const twoPieceManifest = {
       "@spec": "spec link",
-      "@spec_version": "0.1.0",
+      "@spec_version": "1.0.0",
       name: "Test Manifest",
       description: "This is a test manifest",
       version: "1.0.0",
@@ -424,7 +424,7 @@ describe("super manifest verifier", () => {
   test("split file happy day", () => {
     const manifest: SuperManifest = {
       "@spec": "spec link",
-      "@spec_version": "0.1.0",
+      "@spec_version": "1.0.0",
       name: "Test Manifest",
       description: "This is a test manifest",
       version: "1.0.0",
@@ -572,7 +572,7 @@ describe("super manifest verifier", () => {
   test("split file bad hash", () => {
     const manifest: SuperManifest = {
       "@spec": "spec link",
-      "@spec_version": "0.1.0",
+      "@spec_version": "1.0.0",
       name: "Test Manifest",
       description: "This is a test manifest",
       version: "1.0.0",

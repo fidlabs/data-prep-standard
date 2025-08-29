@@ -10,7 +10,7 @@ describe("ls", function () {
         "ls",
         "-r",
         "bafybeidh7dkgpt5u6cgpywlxkimm2wzuc5cerksvovkd5asagdhuottl2i",
-        "testing/inputs/packs/basic/piece-bafybeie7poazgv7xo4ec7zg6twnuec6qinb3jwqmv6tgu3gbb6olbhlh6q.car",
+        "testing/inputs/packs/basic/piece-bafybeibwsqk627ep3eddsnn6pdifho6bzdfi3cwve2tmx5icpx3y5ys524.car",
       ])
     ).not.toThrow();
   });
@@ -21,7 +21,7 @@ describe("ls", function () {
         "ls",
         "-r",
         "bafkreiajkbmpugz75eg2tmocmp3e33sg5kuyq2amzngslahgn6ltmqxxfa",
-        "testing/inputs/packs/basic/piece-bafybeie7poazgv7xo4ec7zg6twnuec6qinb3jwqmv6tgu3gbb6olbhlh6q.car",
+        "testing/inputs/packs/basic/piece-bafybeibwsqk627ep3eddsnn6pdifho6bzdfi3cwve2tmx5icpx3y5ys524.car",
       ])
     ).toThrow();
   });

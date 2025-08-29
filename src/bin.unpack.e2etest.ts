@@ -12,7 +12,7 @@ describe("unpack", function () {
         "testing/inputs/packs/basic/manifest.json",
         "-o",
         "testing/outputs/unpack.e2e.basic",
-        "testing/inputs/packs/basic/piece-bafybeie7poazgv7xo4ec7zg6twnuec6qinb3jwqmv6tgu3gbb6olbhlh6q.car",
+        "testing/inputs/packs/basic/piece-bafybeibwsqk627ep3eddsnn6pdifho6bzdfi3cwve2tmx5icpx3y5ys524.car",
       ]);
       console.log("stdout:", stdout);
     }).not.toThrow();

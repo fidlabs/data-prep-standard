@@ -4,7 +4,7 @@ describe("testing ls function", () => {
   test("calling ls does not error", async () => {
     await expect(
       ls(
-        "testing/inputs/packs/basic/piece-bafybeie7poazgv7xo4ec7zg6twnuec6qinb3jwqmv6tgu3gbb6olbhlh6q.car",
+        "testing/inputs/packs/basic/piece-bafybeibwsqk627ep3eddsnn6pdifho6bzdfi3cwve2tmx5icpx3y5ys524.car",
         { verbose: false }
       )
     ).resolves.not.toThrow();
@@ -13,7 +13,7 @@ describe("testing ls function", () => {
   test("calling ls verbose does not error", async () => {
     await expect(
       ls(
-        "testing/inputs/packs/basic/piece-bafybeie7poazgv7xo4ec7zg6twnuec6qinb3jwqmv6tgu3gbb6olbhlh6q.car",
+        "testing/inputs/packs/basic/piece-bafybeibwsqk627ep3eddsnn6pdifho6bzdfi3cwve2tmx5icpx3y5ys524.car",
         { verbose: true }
       )
     ).resolves.not.toThrow();

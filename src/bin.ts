@@ -45,7 +45,7 @@ You must provide a JSON file with manifest metadata containing the following fie
   .option(
     "--spec-version",
     "version of the metadata specification to use.",
-    "0.1.0"
+    "1.0.0"
   )
   .option("--target-car-size <size>", "Target size of CAR files.", "32GB")
   .action(createAction("./cmd/pack.js"));

@@ -38,11 +38,11 @@ describe("super manifest", () => {
         open_with: "test-app",
         tags: ["test", "manifest"],
       },
-      "0.1.0"
+      "1.0.0"
     );
 
-    expect(manifest["@spec_version"]).toBe("0.1.0");
-    expect(manifest["@spec"]).toBe(specStringWithVersion("0"));
+    expect(manifest["@spec_version"]).toBe("1.0.0");
+    expect(manifest["@spec"]).toBe(specStringWithVersion("1"));
     expect(manifest.name).toBe("Test Manifest");
     expect(manifest.description).toBe("This is a test manifest");
     expect(manifest.version).toBe("1.0.0");
@@ -67,12 +67,12 @@ describe("super manifest", () => {
         open_with: "test-app",
         tags: ["test", "manifest"],
       },
-      "0.1.0"
+      "1.0.0"
     );
 
     const subManifest = manifest.newSubManifest();
-    expect(subManifest["@spec_version"]).toBe("0.1.0");
-    expect(subManifest["@spec"]).toBe(specStringWithVersion("0"));
+    expect(subManifest["@spec_version"]).toBe("1.0.0");
+    expect(subManifest["@spec"]).toBe(specStringWithVersion("1"));
     expect(subManifest.name).toBe("Test Manifest");
     expect(subManifest.description).toBe("This is a test manifest");
     expect(subManifest.version).toBe("1.0.0");
@@ -94,7 +94,7 @@ describe("super manifest", () => {
         open_with: "test-app",
         tags: ["test", "manifest"],
       },
-      "0.1.0"
+      "1.0.0"
     );
 
     const subManifest = manifest.newSubManifest();
@@ -137,7 +137,7 @@ describe("super manifest", () => {
         open_with: "test-app",
         tags: ["test", "manifest"],
       },
-      "0.1.0",
+      "1.0.0",
       { lite: true }
     );
     const subManifest = manifest.newSubManifest();
@@ -171,7 +171,7 @@ describe("super manifest", () => {
         open_with: "test-app",
         tags: ["test", "manifest"],
       },
-      "0.1.0"
+      "1.0.0"
     );
 
     const subManifest1 = manifest.newSubManifest();
@@ -255,7 +255,7 @@ describe("super manifest", () => {
         open_with: "test-app",
         tags: ["test", "manifest"],
       },
-      "0.1.0"
+      "1.0.0"
     );
 
     const subManifest1 = manifest.newSubManifest();
@@ -349,7 +349,7 @@ describe("super manifest", () => {
         open_with: "test-app",
         tags: ["test", "manifest"],
       },
-      "0.1.0"
+      "1.0.0"
     );
 
     const subManifest = manifest.newSubManifest();

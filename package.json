@@ -1,6 +1,6 @@
 {
   "name": "filecoin-prep",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Tool for Filecoin storage data preparation with manifests",
   "author": "Bowball Technologies Ltd.",
   "license": "Apache-2.0 OR MIT",

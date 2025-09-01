@@ -13,7 +13,7 @@ import { JSONReadableStreamFromObject } from "./jsonReadableStreamFromObject.js"
 import type { SubManifest, SubManifestContentEntry } from "./manifest.js";
 
 const SHARD_THRESHOLD = 1000; // shard directory after > 1,000 items
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
 const queuingStrategy = UnixFS.withCapacity();
 
 const defaultSettings = UnixFS.configure({
@@ -189,7 +189,7 @@ export function createDirectoryEncoderStream(
 
   const { readable, writable } = new TransformStream<Block, Block>(
     {},
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+
     queuingStrategy
   );
   const unixfsWriter = UnixFS.createWriter({

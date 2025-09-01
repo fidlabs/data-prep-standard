@@ -50,7 +50,7 @@ describe("testing unpack function", () => {
     await pack(["test"], {
       output: "outdir",
       metadata: "basicUserMetadata.json",
-      specVersion: "0.1.0",
+      specVersion: "1.0.0",
       targetCarSize: "31GiB",
     });
 
@@ -74,7 +74,7 @@ describe("testing unpack function", () => {
     await pack(["test"], {
       output: "outdir",
       metadata: "basicUserMetadata.json",
-      specVersion: "0.1.0",
+      specVersion: "1.0.0",
       targetCarSize: "10",
     });
 

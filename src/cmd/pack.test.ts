@@ -42,7 +42,7 @@ describe("testing pack function", () => {
       pack(["test"], {
         output: "outdir",
         metadata: "basicUserMetadata.json",
-        specVersion: "0.1.0",
+        specVersion: "1.0.0",
         targetCarSize: "31GiB",
       })
     ).resolves.not.toThrow();
@@ -55,8 +55,8 @@ describe("testing pack function", () => {
     expect(JSON.parse(manifestContent)).toEqual(
       expect.objectContaining({
         "@spec":
-          "https://raw.githubusercontent.com/fidlabs/data-prep-standard/refs/heads/main/specification/v0/FilecoinDataPreparationManifestSpecification.md",
-        "@spec_version": "0.1.0",
+          "https://raw.githubusercontent.com/fidlabs/data-prep-standard/refs/heads/main/specification/v1/FilecoinDataPreparationManifestSpecification.md",
+        "@spec_version": "1.0.0",
         uuid: expect.any(String),
         name: "test",
         description: "test desc",
@@ -120,7 +120,7 @@ describe("testing pack function", () => {
         {
           output: "outdir",
           metadata: "basicUserMetadata.json",
-          specVersion: "0.1.0",
+          specVersion: "1.0.0",
           targetCarSize: "31GiB",
         }
       )
@@ -134,8 +134,8 @@ describe("testing pack function", () => {
     expect(JSON.parse(manifestContent)).toEqual(
       expect.objectContaining({
         "@spec":
-          "https://raw.githubusercontent.com/fidlabs/data-prep-standard/refs/heads/main/specification/v0/FilecoinDataPreparationManifestSpecification.md",
-        "@spec_version": "0.1.0",
+          "https://raw.githubusercontent.com/fidlabs/data-prep-standard/refs/heads/main/specification/v1/FilecoinDataPreparationManifestSpecification.md",
+        "@spec_version": "1.0.0",
         uuid: expect.any(String),
         name: "test",
         description: "test desc",
@@ -214,7 +214,7 @@ describe("testing pack function", () => {
       pack(["test"], {
         output: "outdir",
         metadata: "basicUserMetadata.json",
-        specVersion: "0.1.0",
+        specVersion: "1.0.0",
         lite: true,
         targetCarSize: "4B",
       })

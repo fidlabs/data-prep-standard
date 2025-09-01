@@ -132,9 +132,9 @@ export class Manifest implements SuperManifest {
     specVersion: string,
     opts: { lite?: boolean } = {}
   ) {
-    if (specVersion !== "0.1.0") {
+    if (specVersion !== "1.0.0") {
       throw new Error(
-        `Unsupported schema version: ${specVersion}. Only 0.1.0 is supported.`
+        `Unsupported schema version: ${specVersion}. Only 1.0.0 is supported.`
       );
     }
 

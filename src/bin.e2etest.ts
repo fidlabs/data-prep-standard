@@ -12,7 +12,7 @@ describe("CLI", function () {
     expect(() =>
       execaSync(binPath, [
         "ls",
-        "testing/inputs/packs/basic/piece-bafybeie7poazgv7xo4ec7zg6twnuec6qinb3jwqmv6tgu3gbb6olbhlh6q.car",
+        "testing/inputs/packs/basic/piece-bafybeibwsqk627ep3eddsnn6pdifho6bzdfi3cwve2tmx5icpx3y5ys524.car",
       ])
     ).not.toThrow();
   });
@@ -36,7 +36,7 @@ describe("CLI", function () {
         "unpack",
         "-o",
         "testing/outputs/unpack",
-        "testing/inputs/packs/basic/piece-bafybeie7poazgv7xo4ec7zg6twnuec6qinb3jwqmv6tgu3gbb6olbhlh6q.car",
+        "testing/inputs/packs/basic/piece-bafybeibwsqk627ep3eddsnn6pdifho6bzdfi3cwve2tmx5icpx3y5ys524.car",
       ])
     ).not.toThrow();
   });
@@ -45,7 +45,7 @@ describe("CLI", function () {
     expect(() =>
       execaSync(binPath, [
         "verify",
-        "testing/inputs/packs/basic/piece-bafybeie7poazgv7xo4ec7zg6twnuec6qinb3jwqmv6tgu3gbb6olbhlh6q.car",
+        "testing/inputs/packs/basic/piece-bafybeibwsqk627ep3eddsnn6pdifho6bzdfi3cwve2tmx5icpx3y5ys524.car",
       ])
     ).not.toThrow();
   });

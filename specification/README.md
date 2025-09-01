@@ -4,7 +4,7 @@
 
 This directory contains the formal specification for all released versions of the Data Preparation Manifest Specification.
 
-The current version of the specification is [0.1.0](./v0/FilecoinDataPreparationManifestSpecification.md)
+The current version of the specification is [1.0.0](./v1/FilecoinDataPreparationManifestSpecification.md)
 
 ### Versioning
 
@@ -16,4 +16,4 @@ Filecoin Data Preparation Manifest Specification versions follow [SemVer 2.0.0](
 
 ## Version History
 
-### [v0.1.0] Initial pre-release
+### [v1.0.0] Initial release

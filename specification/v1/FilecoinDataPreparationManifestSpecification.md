@@ -1,4 +1,4 @@
-# Filecoin Data Preparation Manifest Specification v0
+# Filecoin Data Preparation Manifest Specification v1
 
 ## Introduction
 
@@ -129,8 +129,8 @@ A sub-manifest shall be provided inside each CAR (piece) which describes the con
 
 ```
 {
-    "@spec": "https://raw.githubusercontent.com/fidlabs/data-prep-standard/refs/heads/main/specification/v0/FilecoinDataPreparationManifestSpecification.md",
-    "@spec_version": "0.1.0",
+    "@spec": "https://raw.githubusercontent.com/fidlabs/data-prep-standard/refs/heads/main/specification/v1/FilecoinDataPreparationManifestSpecification.md",
+    "@spec_version": "1.0.0",
     "@type": "super-manifest,
     "name": "Dogs",
     "description": "Pictures of dogs",
@@ -213,8 +213,8 @@ A sub-manifest shall be provided inside each CAR (piece) which describes the con
 Sub manifest in CAR in Piece 1
 ```
 {
-    "@spec": "https://raw.githubusercontent.com/fidlabs/data-prep-standard/refs/heads/main/specification/v0/FilecoinDataPreparationManifestSpecification.md",
-    "@spec_version": "0.1.0",
+    "@spec": "https://raw.githubusercontent.com/fidlabs/data-prep-standard/refs/heads/main/specification/v1/FilecoinDataPreparationManifestSpecification.md",
+    "@spec_version": "1.0.0",
     "@type": "sub-manifest,
     "name": "Dogs",
     "description": "Pictures of dogs",
@@ -257,7 +257,7 @@ Sub manifest in CAR in Piece 2
 ```
 {
     "@spec": "https://raw.githubusercontent.com/fidlabs/data-prep-standard/refs/heads/main/specification/v0/FilecoinDataPreparationManifestSpecification.md",
-    "@spec_version": "0.1.0",
+    "@spec_version": "1.0.0",
     "@type": "sub-manifest,
     "name": "Dogs",
     "description": "Pictures of dogs",
@@ -305,6 +305,6 @@ Sub manifest in CAR in Piece 2
 
 ## Version History
 
-### [v0.1.0] Initial pre-release
+### [v1.0.0] Initial release
 
-Basic shape of super and sub manifests defined.
+Dataset definition metadata and file content info with verification data.
